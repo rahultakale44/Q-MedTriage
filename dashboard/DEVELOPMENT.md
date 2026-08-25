@@ -5,43 +5,46 @@
 ### ✅ Completed (Commit 01)
 
 1. **Project Metadata Updated**
-   - Updated README.md to reflect JSRT dataset (not CheXpert)
-   - Updated browser title to "Q-MedTriage | Quantum Medical Intelligence"
-
 2. **Centralized Demo Data**
-   - Created `/src/data/demoData.js` with structured mock data
-   - All hardcoded values now reference centralized source
-   - Clear separation between demo and future real data
-
 3. **Data Architecture**
-   - `DEMO_ANALYSIS` - Complete pipeline analysis data
-   - `DEMO_QUANTUM_CIRCUIT` - Quantum visualization data
-   - `DEMO_MODEL_COMPARISON` - Classical vs Quantum metrics
-   - `DEMO_SYSTEM_STATUS` - System health indicators
-
 4. **CNN Backbone Updated**
-   - Changed from "MOBILENET" to "ResNet50"
-   - Feature dimensions: 1280D → 2048D
-   - All references now use `DEMO_ANALYSIS.cnn.*`
-
 5. **Pipeline State Hook**
-   - Created `/src/hooks/usePipeline.js`
-   - Ready for future backend integration
-   - Manages uploaded image and analysis state
-
 6. **API Service Layer**
-   - Created `/src/services/api.js`
-   - Demo mode with simulated delays
-   - Clean interface for backend integration
-   - Functions ready: `analyzeImage`, `askQuestion`, `checkHealth`
-
 7. **Updated Visualizations**
-   - CNN: Now shows 2048 features
-   - PCA: Shows 2048D → 4D compression
-   - Quantum: Uses real PCA component values
-   - Evidence: Maps over actual demo evidence array
-   - Reasoning: Dynamic source count
-   - Triage: Dynamic confidence percentage
+
+### ✅ Completed (Commit 02)
+
+1. **Image Propagation Through Pipeline**
+   - Uploaded image now appears in PREPROCESS stage
+   - Uploaded image now appears in CNN (VISION) stage
+   - User's actual X-ray flows through early pipeline stages
+   - FakeXray only shows when no image uploaded
+
+2. **Visual Flow Indicators**
+   - Added "DATA FLOWS TO [NEXT STAGE]" indicators between stages
+   - Arrow icons show progression direction
+   - Helps user understand stage connections
+
+3. **Stage Transition Animations**
+   - Smooth fade and scale transitions between stages
+   - Each stage animates in with opacity and scale
+   - Creates cohesive flow feeling
+
+4. **Pipeline Status Indicators**
+   - Mini image preview in pipeline header when image uploaded
+   - "IMAGE IN PIPELINE" indicator shows active analysis
+   - Stage progress dots at bottom show completed stages
+   - Dots illuminate as user scrolls through stages
+
+5. **Enhanced Stage Descriptions**
+   - Each stage now explains INPUT → PROCESS → OUTPUT
+   - More detailed descriptions of what happens at each step
+   - Better technical communication of the architecture
+
+6. **Performance**
+   - Dynamic latency display from demo data
+   - All builds successful (349KB bundle)
+   - No console errors
 
 ## Architecture
 
@@ -60,13 +63,14 @@ dashboard/src/
 
 ## Next Steps
 
-### Phase 2: Image Propagation (Commits 02-05)
-- [ ] Make uploaded image appear in preprocessing stage
-- [ ] Show uploaded image in CNN stage
-- [ ] Add visual flow indicators between stages
-- [ ] Implement stage-to-stage transitions
+### ~~Phase 2: Image Propagation (Commits 02-05)~~ ✅ DONE
+- [x] Make uploaded image appear in preprocessing stage
+- [x] Show uploaded image in CNN stage
+- [x] Add visual flow indicators between stages
+- [x] Implement stage-to-stage transitions
+- [x] Add pipeline progress indicators
 
-### Phase 3: Enhanced Storytelling (Commits 06-10)
+### Phase 3: Enhanced Storytelling (Commits 03-07)
 - [ ] Add "data flowing" animations
 - [ ] Improve INPUT → PROCESS → OUTPUT narrative
 - [ ] Add stage connection lines

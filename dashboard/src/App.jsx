@@ -27,7 +27,8 @@ const stages = [
     label: "INPUT",
     title: "The image enters.",
     description:
-      "A medical image becomes the first signal in the Q-MedTriage intelligence pipeline.",
+      "A chest X-ray becomes the first signal in the Q-MedTriage intelligence pipeline. " +
+      "The raw medical image is uploaded and prepared for analysis.",
     icon: Upload,
   },
   {
@@ -35,7 +36,8 @@ const stages = [
     label: "PREPROCESS",
     title: "Clean the signal.",
     description:
-      "The image is normalized and prepared for visual feature extraction.",
+      "The raw image is transformed into a standardized format. Resizing, normalization, " +
+      "and noise reduction prepare the image for deep learning feature extraction.",
     icon: ScanLine,
   },
   {
@@ -43,7 +45,8 @@ const stages = [
     label: "VISION",
     title: "See the patterns.",
     description:
-      "Transfer learning extracts clinically relevant visual representations.",
+      "A pre-trained convolutional neural network extracts clinically relevant visual features. " +
+      "The network identifies patterns learned from thousands of medical images.",
     icon: BrainCircuit,
   },
   {
@@ -51,7 +54,8 @@ const stages = [
     label: "REDUCTION",
     title: "Compress intelligence.",
     description:
-      "High-dimensional CNN features are projected into a compact 4-dimensional representation.",
+      "High-dimensional CNN features are projected into a compact representation using PCA. " +
+      "This compression retains essential information while reducing dimensionality for quantum processing.",
     icon: Layers3,
   },
   {
@@ -59,7 +63,8 @@ const stages = [
     label: "QUANTUM",
     title: "Enter the quantum core.",
     description:
-      "The compact feature representation is encoded into a quantum classification circuit.",
+      "The compact feature representation is encoded into a quantum circuit. " +
+      "Quantum gates process the data through superposition and entanglement for classification.",
     icon: Waves,
   },
   {
@@ -67,7 +72,8 @@ const stages = [
     label: "EVIDENCE",
     title: "Bring the evidence.",
     description:
-      "Relevant medical knowledge is retrieved to ground the model output.",
+      "Relevant medical knowledge is retrieved from a vector database using semantic search. " +
+      "Evidence grounds the model's prediction in established clinical understanding.",
     icon: FileSearch,
   },
   {
@@ -75,7 +81,8 @@ const stages = [
     label: "REASONING",
     title: "Connect the dots.",
     description:
-      "The evidence layer transforms a raw prediction into an interpretable triage signal.",
+      "A large language model synthesizes the model prediction with retrieved evidence. " +
+      "The raw classification becomes an interpretable, grounded explanation.",
     icon: Sparkles,
   },
   {
@@ -83,7 +90,8 @@ const stages = [
     label: "TRIAGE",
     title: "Actionable intelligence.",
     description:
-      "The final system response combines model confidence, evidence and priority.",
+      "The final system output combines model confidence, evidence sources, and priority assessment. " +
+      "This AI-assisted triage supports clinical decision-making, not replacement.",
     icon: Activity,
   },
 ];
@@ -397,7 +405,17 @@ function App() {
           />
 
           <div className="live-readout">
-            <span>LIVE PIPELINE</span>
+            <div className="stage-progress">
+              {stages.map((stage, index) => (
+                <div
+                  key={stage.id}
+                  className={`progress-dot ${
+                    index <= activeStage ? "completed" : ""
+                  }`}
+                  title={stage.label}
+                />
+              ))}
+            </div>
 
             <strong>
               {String(activeStage + 1).padStart(2, "0")} /{" "}
@@ -429,6 +447,21 @@ function App() {
                   <h2>{stage.title}</h2>
 
                   <p>{stage.description}</p>
+
+                  {/* Show data flow indicator */}
+                  {index > 0 && index < stages.length - 1 && (
+                    <div className="stage-flow-indicator">
+                      <motion.div
+                        className="flow-arrow"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5, duration: 0.6 }}
+                      >
+                        <ChevronRight size={12} />
+                        <span>DATA FLOWS TO {stages[index + 1].label}</span>
+                      </motion.div>
+                    </div>
+                  )}
 
                   <SceneDetails
                     stage={stage.id}
@@ -601,7 +634,7 @@ function PipelineCore({
       return "—";
     }
 
-    return "04";
+    return String(DEMO_ANALYSIS.pca.outputDimension).padStart(2, "0");
   }, [activeStage]);
 
   return (
@@ -609,7 +642,17 @@ function PipelineCore({
       <div className="pipeline-grid" />
 
       <div className="pipeline-header">
-        <span>Q-MED ENGINE</span>
+        <div className="pipeline-header-left">
+          <span>Q-MED ENGINE</span>
+          {image && (
+            <div className="pipeline-image-indicator">
+              <div className="image-preview-mini">
+                <img src={image} alt="Processing" />
+              </div>
+              <span>IMAGE IN PIPELINE</span>
+            </div>
+          )}
+        </div>
 
         <span>
           {analysisStarted
@@ -628,42 +671,106 @@ function PipelineCore({
 
       <div className="visual-center">
         {activeStage === 0 && (
-          <InputVisual image={image} />
+          <motion.div
+            key="stage-0"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <InputVisual image={image} />
+          </motion.div>
         )}
 
         {activeStage === 1 && (
-          <PreprocessVisual />
+          <motion.div
+            key="stage-1"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <PreprocessVisual image={image} />
+          </motion.div>
         )}
 
         {activeStage === 2 && (
-          <CNNVisual />
+          <motion.div
+            key="stage-2"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <CNNVisual image={image} />
+          </motion.div>
         )}
 
         {activeStage === 3 && (
-          <PCAVisual
-            featureCount={featureCount}
-          />
+          <motion.div
+            key="stage-3"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <PCAVisual
+              featureCount={featureCount}
+            />
+          </motion.div>
         )}
 
         {activeStage === 4 && (
-          <QuantumVisual />
+          <motion.div
+            key="stage-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <QuantumVisual />
+          </motion.div>
         )}
 
         {activeStage === 5 && (
-          <EvidenceVisual />
+          <motion.div
+            key="stage-5"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <EvidenceVisual />
+          </motion.div>
         )}
 
         {activeStage === 6 && (
-          <ReasonVisual />
+          <motion.div
+            key="stage-6"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <ReasonVisual />
+          </motion.div>
         )}
 
         {activeStage === 7 && (
-          <TriageVisual />
+          <motion.div
+            key="stage-7"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.4 }}
+          >
+            <TriageVisual />
+          </motion.div>
         )}
       </div>
 
       <div className="pipeline-footer">
-        <span>LATENCY 042ms</span>
+        <span>LATENCY {DEMO_ANALYSIS.performance.totalLatency}</span>
         <span>MODEL ONLINE</span>
         <span>SECURE CHANNEL</span>
       </div>
@@ -744,7 +851,7 @@ function FakeXray() {
    PREPROCESS
 =========================================================== */
 
-function PreprocessVisual() {
+function PreprocessVisual({ image }) {
   return (
     <motion.div
       className="process-visual"
@@ -752,7 +859,15 @@ function PreprocessVisual() {
       animate={{ opacity: 1 }}
     >
       <div className="processing-image">
-        <FakeXray />
+        {image ? (
+          <img
+            src={image}
+            alt="Preprocessing X-ray"
+            className="processing-xray-image"
+          />
+        ) : (
+          <FakeXray />
+        )}
 
         <motion.div
           className="processing-grid"
@@ -767,14 +882,9 @@ function PreprocessVisual() {
       </div>
 
       <div className="process-stream">
-        {[
-          "RESIZE 224×224",
-          "NORMALIZE",
-          "DENOISE",
-          "CHANNEL ALIGN",
-        ].map((item, i) => (
+        {DEMO_ANALYSIS.preprocessing.steps.map((step, i) => (
           <motion.div
-            key={item}
+            key={step.name}
             initial={{
               opacity: 0,
               x: 20,
@@ -788,7 +898,7 @@ function PreprocessVisual() {
             }}
           >
             <CheckCircle2 size={13} />
-            {item}
+            {step.name}
           </motion.div>
         ))}
       </div>
@@ -800,7 +910,7 @@ function PreprocessVisual() {
    CNN
 =========================================================== */
 
-function CNNVisual() {
+function CNNVisual({ image }) {
   const nodes = Array.from({
     length: 18,
   });
@@ -808,7 +918,15 @@ function CNNVisual() {
   return (
     <div className="cnn-visual">
       <div className="cnn-image">
-        <FakeXray />
+        {image ? (
+          <img
+            src={image}
+            alt="CNN input X-ray"
+            className="cnn-xray-image"
+          />
+        ) : (
+          <FakeXray />
+        )}
       </div>
 
       <div className="cnn-network">

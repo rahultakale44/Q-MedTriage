@@ -20,13 +20,13 @@ The system combines:
 
 🚧 Under active development
 
-**Current Progress:** COMMIT 07/30
+**Current Progress:** COMMIT 08/30
 - ✅ Dataset migration (Kermany Chest X-Ray)
 - ✅ Reproducible train/validation/test splits
 - ✅ Preprocessing pipeline with augmentation
 - ✅ ResNet50 feature extraction infrastructure
-- 🔄 Feature extraction (ready, not yet run on full dataset)
-- ⏳ PCA reduction (4D)
+- ✅ PCA dimensionality reduction (2048D → 4D)
+- 🔄 Feature extraction + PCA (ready, not yet run on full dataset)
 - ⏳ Classical SVM training
 - ⏳ Quantum QSVM training
 - ⏳ Model comparison & evaluation
@@ -97,13 +97,19 @@ python src/data/validate_splits.py
 python src/data/kermany_dataset.py
 ```
 
-**Feature Extraction (ResNet50 → 2048D):**
+**Feature Extraction (ResNet50 → 2048D) + PCA Reduction (2048D → 4D):**
 ```bash
-# Test on small sample (10 images)
+# Test feature extraction on small sample (10 images)
 python src/models/test_extraction_sample.py
 
 # Extract features for full dataset
 python src/models/extract_features.py
+
+# Test PCA on small sample
+python src/models/test_pca_sample.py
+
+# Apply PCA reduction to full dataset
+python src/models/apply_pca.py
 ```
 
 Frontend development continues with deterministic demo data until the full ML pipeline is trained.

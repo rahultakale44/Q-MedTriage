@@ -17,15 +17,17 @@ from typing import Tuple, Optional
 class PCAReducer:
     """PCA-based dimensionality reduction for CNN features"""
 
-    def __init__(self, n_components: int = 4):
+    def __init__(self, n_components: int = 4, random_state: int = 42):
         """
         Initialize PCA reducer
 
         Args:
             n_components: Target number of dimensions (default: 4 for quantum)
+            random_state: Random state for reproducibility (sklearn PCA is deterministic)
         """
         self.n_components = n_components
-        self.pca = PCA(n_components=n_components)
+        self.random_state = random_state
+        self.pca = PCA(n_components=n_components, random_state=random_state)
         self.is_fitted = False
 
     def fit(self, features: np.ndarray) -> "PCAReducer":

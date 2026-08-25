@@ -1,3 +1,25 @@
+/**
+ * Q-MEDTRIAGE MAIN APPLICATION
+ * 
+ * This is the main application container that orchestrates the entire
+ * Q-MedTriage frontend experience. It manages:
+ * 
+ * - Image upload and storage
+ * - Pipeline stage progression (manual scroll + auto-run)
+ * - Navigation state and scroll tracking
+ * - Stage-specific visualizations
+ * - Demo data display (until backend integration)
+ * 
+ * Architecture:
+ * - Hero section with animated core
+ * - 8-stage scrolling pipeline with sticky visualization
+ * - Final system summary section
+ * - Auto-run mode for automatic progression
+ * 
+ * Current State: Frontend-only with demo data
+ * Next Phase: Backend integration via /src/services/api.js
+ */
+
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
@@ -19,6 +41,13 @@ import {
 } from "lucide-react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { DEMO_ANALYSIS } from "./data/demoData";
+import {
+  Navbar,
+  StageNavigation,
+  ScrollProgress,
+  FakeXray,
+  AutoRunButton,
+} from "./components";
 import "./App.css";
 
 const stages = [
@@ -245,89 +274,23 @@ function App() {
           TOP NAVIGATION
       ===================================================== */}
 
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">
-            <Activity size={20} />
-          </div>
-
-          <div>
-            <div className="brand-name">
-              Q-MEDTRIAGE
-            </div>
-
-            <div className="brand-sub">
-              QUANTUM MEDICAL INTELLIGENCE
-            </div>
-          </div>
-        </div>
-
-        <nav className="nav-links">
-          {[
-            "OVERVIEW",
-            "PIPELINE",
-            "QUANTUM",
-            "EVIDENCE",
-            "TRIAGE",
-          ].map((item, index) => {
-            const targetStages = [0, 2, 4, 5, 7];
-
-            return (
-              <button
-                key={item}
-                onClick={() =>
-                  jumpTo(targetStages[index])
-                }
-                className={
-                  activeStage >= targetStages[index]
-                    ? "nav-active"
-                    : ""
-                }
-              >
-                {item}
-              </button>
-            );
-          })}
-        </nav>
-
-        <div className="system-status">
-          <span className="status-dot" />
-          SYSTEM ONLINE
-        </div>
-      </header>
+      <Navbar activeStage={activeStage} onNavigate={jumpTo} />
 
       {/* =====================================================
           TOP PROGRESS
       ===================================================== */}
 
-      <motion.div
-        className="top-progress"
-        style={{
-          width: progressWidth,
-        }}
-      />
+      <ScrollProgress progressWidth={progressWidth} />
 
       {/* =====================================================
           STAGE DOT NAVIGATION
       ===================================================== */}
 
-      <aside className="stage-dots">
-        {stages.map((stage, index) => (
-          <button
-            key={stage.id}
-            className={
-              index === activeStage
-                ? "dot-active"
-                : ""
-            }
-            onClick={() => jumpTo(index)}
-            title={stage.label}
-          >
-            <span />
-            <small>{stage.label}</small>
-          </button>
-        ))}
-      </aside>
+      <StageNavigation
+        stages={stages}
+        activeStage={activeStage}
+        onNavigate={jumpTo}
+      />
 
       {/* =====================================================
           HERO
@@ -467,7 +430,6 @@ function App() {
                     stage={stage.id}
                     image={image}
                     fileInputRef={fileInputRef}
-                    handleUpload={handleUpload}
                   />
                 </div>
               </article>
@@ -548,20 +510,10 @@ function App() {
           AUTO RUN
       ===================================================== */}
 
-      <button
-        className={`auto-run ${
-          autoRun ? "running" : ""
-        }`}
-        onClick={() =>
-          setAutoRun((value) => !value)
-        }
-      >
-        <span className="auto-dot" />
-
-        {autoRun
-          ? "AUTO RUNNING"
-          : "AUTO RUN"}
-      </button>
+      <AutoRunButton
+        isRunning={autoRun}
+        onToggle={() => setAutoRun((value) => !value)}
+      />
 
       {/* =====================================================
           HIDDEN FILE INPUT
@@ -823,27 +775,6 @@ function InputVisual({ image }) {
         IMAGE SIGNAL DETECTED
       </div>
     </motion.div>
-  );
-}
-
-/* ===========================================================
-   FAKE X-RAY
-=========================================================== */
-
-function FakeXray() {
-  return (
-    <div className="fake-xray">
-      <div className="lung left" />
-      <div className="lung right" />
-      <div className="spine" />
-
-      <div className="rib rib-1" />
-      <div className="rib rib-2" />
-      <div className="rib rib-3" />
-      <div className="rib rib-4" />
-      <div className="rib rib-5" />
-      <div className="rib rib-6" />
-    </div>
   );
 }
 
@@ -1315,7 +1246,6 @@ function SceneDetails({
   stage,
   image,
   fileInputRef,
-  handleUpload,
 }) {
   if (stage === "input") {
     return (

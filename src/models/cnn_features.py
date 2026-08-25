@@ -38,7 +38,7 @@ class ResNet50FeatureExtractor:
             self.device = torch.device(device)
 
         # Load pre-trained ResNet50
-        self.model = models.resnet50(pretrained=True)
+        self.model = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
 
         # Remove final classification layer
         # ResNet50 outputs 2048-dim features before the FC layer

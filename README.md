@@ -20,6 +20,17 @@ The system combines:
 
 🚧 Under active development
 
+**Current Progress:** COMMIT 07/30
+- ✅ Dataset migration (Kermany Chest X-Ray)
+- ✅ Reproducible train/validation/test splits
+- ✅ Preprocessing pipeline with augmentation
+- ✅ ResNet50 feature extraction infrastructure
+- 🔄 Feature extraction (ready, not yet run on full dataset)
+- ⏳ PCA reduction (4D)
+- ⏳ Classical SVM training
+- ⏳ Quantum QSVM training
+- ⏳ Model comparison & evaluation
+
 ## Core Pipeline
 
 Chest X-ray
@@ -49,17 +60,50 @@ The dataset is not stored in this repository due to size and licensing restricti
 
 **Dataset Location:** `data/archive (1)/chest_xray/`
 
-**Dataset Statistics:**
-- Total Images: 5,856
-- Training: 5,216 images (NORMAL: 1,341 | PNEUMONIA: 3,875)
-- Validation: 16 images (NORMAL: 8 | PNEUMONIA: 8)
-- Test: 624 images (NORMAL: 234 | PNEUMONIA: 390)
+**Dataset Statistics (Total: 5,856 images):**
 
-**Official Splits:** The Kermany dataset provides pre-split train/validation/test sets, which are preserved for reproducibility.
+**Reproducible Splits:**
+- **Training:** 4,172 images (NORMAL: 1,072 [25.7%] | PNEUMONIA: 3,100 [74.3%])
+- **Validation:** 1,044 images (NORMAL: 269 [25.8%] | PNEUMONIA: 775 [74.2%])
+- **Test:** 624 images (NORMAL: 234 [37.5%] | PNEUMONIA: 390 [62.5%])
 
-**To inspect the dataset:**
+**Split Strategy:**
+- Official Kermany test set (624 images) preserved exactly as provided
+- Training/validation split created from original train data (80%/20% stratified)
+- Fixed random seed (42) for reproducibility
+- Image-level split (patient metadata not available)
+- Zero data leakage verified
+
+**Class Imbalance Handling:**
+- Training data: ~74% PNEUMONIA, ~26% NORMAL
+- Weighted random sampling during training
+- Class-weighted loss functions
+- Stratified validation split
+
+**Preprocessing Pipeline:**
+- Training: Resize → RandomCrop → HorizontalFlip → MildRotation → ColorJitter → Normalize (ImageNet)
+- Validation/Test: Resize → CenterCrop → Normalize (deterministic)
+- Target size: 224×224 (ResNet50 compatible)
+
+**To create/inspect splits:**
 ```bash
+# Create reproducible splits
+python src/data/create_splits.py
+
+# Validate splits (no leakage)
+python src/data/validate_splits.py
+
+# Inspect dataset
 python src/data/kermany_dataset.py
+```
+
+**Feature Extraction (ResNet50 → 2048D):**
+```bash
+# Test on small sample (10 images)
+python src/models/test_extraction_sample.py
+
+# Extract features for full dataset
+python src/models/extract_features.py
 ```
 
 Frontend development continues with deterministic demo data until the full ML pipeline is trained.

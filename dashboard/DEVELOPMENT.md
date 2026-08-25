@@ -70,7 +70,49 @@ dashboard/src/
 - [x] Implement stage-to-stage transitions
 - [x] Add pipeline progress indicators
 
-### Phase 3: Enhanced Storytelling (Commits 03-07)
+### ~~Phase 3: Component Organization (Commit 03)~~ ✅ DONE
+- [x] Review /components/ directory files
+- [x] Remove empty placeholder components
+- [x] Extract reusable components (Navbar, StageNavigation, etc.)
+- [x] Create component documentation
+- [x] Improve code organization
+
+### Phase 4: Backend & ML Pipeline (Commits 04-15)
+- [ ] Inspect downloaded JSRT dataset structure
+- [ ] Validate nodule/non-nodule organization
+- [ ] Create dataset statistics and splits
+- [ ] Implement preprocessing pipeline
+- [ ] Implement transfer learning (ResNet50)
+- [ ] Extract CNN features
+- [ ] Implement PCA compression
+- [ ] Train classical SVM classifier
+- [ ] Implement quantum kernel (Qiskit)
+- [ ] Train QSVM classifier
+- [ ] Compare classical vs quantum performance
+- [ ] Generate evaluation metrics
+
+### Phase 5: Explainability & RAG (Commits 16-22)
+- [ ] Implement Grad-CAM visualization
+- [ ] Build medical knowledge base
+- [ ] Implement embeddings and vector search (FAISS)
+- [ ] Create RAG pipeline
+- [ ] Integrate LLM for grounded explanations
+- [ ] Connect evidence to frontend
+
+### Phase 6: Full Integration (Commits 23-28)
+- [ ] Connect backend API to frontend
+- [ ] Test full pipeline end-to-end
+- [ ] Performance optimization
+- [ ] Error handling and edge cases
+- [ ] Final polish and testing
+
+### Phase 7: Documentation & Deployment (Commits 29-30)
+- [ ] Complete README documentation
+- [ ] Deployment instructions
+- [ ] Demo preparation
+- [ ] Final review
+
+**Target: 30 meaningful commits total**
 - [ ] Add "data flowing" animations
 - [ ] Improve INPUT → PROCESS → OUTPUT narrative
 - [ ] Add stage connection lines

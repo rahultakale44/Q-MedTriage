@@ -156,7 +156,7 @@ if __name__ == "__main__":
     extractor = ResNet50FeatureExtractor()
 
     print(f"\nFeature dimension: {extractor.get_feature_dim()}")
-    print("\nReady to extract features from JSRT dataset")
+    print("\nReady to extract features from Kermany Chest X-Ray dataset")
     print("Usage:")
     print("  features = extractor.extract_features('path/to/image.png')")
     print("  batch_features = extractor.extract_batch_features(image_paths)")

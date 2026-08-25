@@ -22,7 +22,7 @@ from typing import Dict, Tuple
 
 
 class ClassicalSVM:
-    """Classical SVM classifier for nodule detection"""
+    """Classical SVM classifier for pneumonia detection"""
 
     def __init__(self, kernel: str = "rbf", C: float = 1.0, gamma: str = "scale"):
         """
@@ -137,7 +137,7 @@ class ClassicalSVM:
             print("\nConfusion Matrix:")
             print(f"  {metrics['confusion_matrix']}")
             print("\nClassification Report:")
-            print(classification_report(y_test, y_pred, target_names=["Non-Nodule", "Nodule"]))
+            print(classification_report(y_test, y_pred, target_names=["NORMAL", "PNEUMONIA"]))
 
         return metrics
 

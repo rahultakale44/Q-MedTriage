@@ -205,7 +205,7 @@ class QuantumSVM:
             print("\nConfusion Matrix:")
             print(f"  {metrics['confusion_matrix']}")
             print("\nClassification Report:")
-            print(classification_report(y_test, y_pred, target_names=["Non-Nodule", "Nodule"]))
+            print(classification_report(y_test, y_pred, target_names=["NORMAL", "PNEUMONIA"]))
 
         return metrics
 

@@ -1,9 +1,12 @@
 /**
  * DEMO DATA FOR Q-MEDTRIAGE FRONTEND
  * 
- * This file contains deterministic mock data used while the JSRT dataset
- * is being prepared and the ML pipeline is being implemented.
+ * This file contains deterministic mock data used while the Kermany Chest X-Ray
+ * dataset is being prepared and the ML pipeline is being implemented.
  * 
+ * ⚠️ TEMPORARY: This demo data shows NODULE detection for UI development.
+ * The actual backend will use NORMAL vs PNEUMONIA classification (Kermany dataset).
+ * Frontend will be updated to reflect PNEUMONIA detection once backend is integrated.
  * These values are clearly separated from future real model outputs.
  * When backend integration is complete, this data will be replaced by
  * actual API responses.

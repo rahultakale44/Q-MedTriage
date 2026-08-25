@@ -35,17 +35,34 @@ Chest X-ray
 
 ## Dataset
 
-**Current Dataset: JSRT (Japanese Society of Radiological Technology)**
+**Current Dataset: Kermany Chest X-Ray Dataset**
 
-Classification Task: **Nodule Detection**
-- Nodule images
-- Non-nodule images
+**Reference:** Kermany, Daniel; Zhang, Kang; Goldbaum, Michael (2018), "Labeled Optical Coherence Tomography (OCT) and Chest X-Ray Images for Classification", Mendeley Data, v2
 
-Dataset is not stored inside this repository because of
-dataset size and licensing restrictions.
+**Classification Task:** NORMAL vs PNEUMONIA
+- NORMAL (negative class)
+- PNEUMONIA (positive class)
 
-The JSRT dataset is currently being downloaded and prepared.
-Frontend development continues with deterministic demo data.
+**Dataset Source:** Available on Kaggle: [Chest X-Ray Images (Pneumonia)](https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia)
+
+The dataset is not stored in this repository due to size and licensing restrictions.
+
+**Dataset Location:** `data/archive (1)/chest_xray/`
+
+**Dataset Statistics:**
+- Total Images: 5,856
+- Training: 5,216 images (NORMAL: 1,341 | PNEUMONIA: 3,875)
+- Validation: 16 images (NORMAL: 8 | PNEUMONIA: 8)
+- Test: 624 images (NORMAL: 234 | PNEUMONIA: 390)
+
+**Official Splits:** The Kermany dataset provides pre-split train/validation/test sets, which are preserved for reproducibility.
+
+**To inspect the dataset:**
+```bash
+python src/data/kermany_dataset.py
+```
+
+Frontend development continues with deterministic demo data until the full ML pipeline is trained.
 
 ## Disclaimer
 

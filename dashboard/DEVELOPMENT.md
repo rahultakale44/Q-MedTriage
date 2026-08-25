@@ -78,10 +78,9 @@ dashboard/src/
 - [x] Improve code organization
 
 ### Phase 4: Backend & ML Pipeline (Commits 04-15)
-- [ ] Inspect downloaded JSRT dataset structure
-- [ ] Validate nodule/non-nodule organization
-- [ ] Create dataset statistics and splits
-- [ ] Implement preprocessing pipeline
+- [x] **COMMIT 04/30** — Initial ML infrastructure (ResNet50, PCA, SVM, QSVM, Qiskit)
+- [x] **COMMIT 05/30** — Kermany dataset migration & verification
+- [ ] Implement preprocessing pipeline for Kermany X-rays
 - [ ] Implement transfer learning (ResNet50)
 - [ ] Extract CNN features
 - [ ] Implement PCA compression
@@ -177,15 +176,20 @@ npm run lint
 
 ## Dataset Status
 
-**Current Dataset**: JSRT (Nodule / Non-Nodule)
-**Status**: Downloading in background
-**Frontend Strategy**: Continue development with demo data
+**Current Dataset**: Kermany Chest X-Ray Images (Pneumonia)
+**Classification Task**: NORMAL vs PNEUMONIA
+**Status**: ✅ Dataset verified and migrated (5,856 images)
+**Location**: `data/archive (1)/chest_xray/`
+**Frontend Strategy**: Continue development with demo data until backend integration
 
-Once dataset download completes:
-1. Inspect actual file structure
-2. Update preprocessing pipeline
-3. Train models
-4. Replace demo data with real results
+**Dataset Statistics**:
+- Training: 5,216 images (NORMAL: 1,341 | PNEUMONIA: 3,875)
+- Validation: 16 images (NORMAL: 8 | PNEUMONIA: 8)
+- Test: 624 images (NORMAL: 234 | PNEUMONIA: 390)
+
+**⚠️ Frontend Demo Data Note**: 
+The current frontend demo data shows "Nodule" detection for UI development purposes. 
+Once the backend is integrated, this will be updated to reflect the actual NORMAL vs PNEUMONIA classification task.
 
 ## Key Design Principles
 

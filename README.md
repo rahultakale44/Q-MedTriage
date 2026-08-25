@@ -35,10 +35,17 @@ Chest X-ray
 
 ## Dataset
 
-CheXpert chest X-ray dataset.
+**Current Dataset: JSRT (Japanese Society of Radiological Technology)**
+
+Classification Task: **Nodule Detection**
+- Nodule images
+- Non-nodule images
 
 Dataset is not stored inside this repository because of
 dataset size and licensing restrictions.
+
+The JSRT dataset is currently being downloaded and prepared.
+Frontend development continues with deterministic demo data.
 
 ## Disclaimer
 

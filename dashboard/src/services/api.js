@@ -9,12 +9,12 @@
 import { DEMO_ANALYSIS, DEMO_SYSTEM_STATUS } from "../data/demoData";
 
 // Backend API base URL
-// TODO: Update this when backend is deployed
+// Updated to use real backend
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // Demo mode flag
-// Set to false when backend is ready
-const USE_DEMO_DATA = true;
+// Set to false to use real backend
+const USE_DEMO_DATA = false;
 
 /**
  * Simulated API delay for realistic UX

@@ -23,6 +23,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
+  AlertCircle,
   ArrowDown,
   BrainCircuit,
   CheckCircle2,
@@ -41,6 +42,7 @@ import {
 } from "lucide-react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { DEMO_ANALYSIS } from "./data/demoData";
+import { usePrediction } from "./hooks/usePrediction";
 import {
   Navbar,
   StageNavigation,
@@ -132,6 +134,12 @@ function App() {
   const [analysisStarted, setAnalysisStarted] = useState(false);
 
   const fileInputRef = useRef(null);
+
+  // Real prediction hook
+  const { isLoading, isComplete, result, error, predict } = usePrediction();
+
+  // Use real result if available, otherwise fall back to demo data for educational sections
+  const analysisData = result || DEMO_ANALYSIS;
 
   const { scrollYProgress } = useScroll();
 
@@ -231,7 +239,7 @@ function App() {
      IMAGE UPLOAD
   --------------------------------------------------------- */
 
-  const handleUpload = (event) => {
+  const handleUpload = async (event) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -241,6 +249,7 @@ function App() {
     setImage(url);
     setAnalysisStarted(true);
 
+    // Scroll to preprocessing stage
     setTimeout(() => {
       document
         .getElementById("scene-1")
@@ -251,6 +260,14 @@ function App() {
 
       setAutoRun(true);
     }, 500);
+
+    // Call real API for prediction
+    try {
+      await predict(file);
+    } catch (err) {
+      console.error("Prediction failed:", err);
+      // Error state is managed by the hook
+    }
   };
 
   /* ---------------------------------------------------------
@@ -365,6 +382,10 @@ function App() {
             activeStage={activeStage}
             image={image}
             analysisStarted={analysisStarted}
+            analysisData={analysisData}
+            isLoading={isLoading}
+            isComplete={isComplete}
+            error={error}
           />
 
           <div className="live-readout">
@@ -430,6 +451,7 @@ function App() {
                     stage={stage.id}
                     image={image}
                     fileInputRef={fileInputRef}
+                    analysisData={analysisData}
                   />
                 </div>
               </article>
@@ -580,14 +602,18 @@ function PipelineCore({
   activeStage,
   image,
   analysisStarted,
+  analysisData = DEMO_ANALYSIS,
+  isLoading = false,
+  isComplete = false,
+  error = null,
 }) {
   const featureCount = useMemo(() => {
     if (activeStage < 3) {
       return "—";
     }
 
-    return String(DEMO_ANALYSIS.pca.outputDimension).padStart(2, "0");
-  }, [activeStage]);
+    return String(analysisData.pca.outputDimension).padStart(2, "0");
+  }, [activeStage, analysisData]);
 
   return (
     <div className="pipeline-visual">
@@ -607,7 +633,11 @@ function PipelineCore({
         </div>
 
         <span>
-          {analysisStarted
+          {error
+            ? "ERROR"
+            : isLoading
+            ? "ANALYZING"
+            : analysisStarted
             ? "PROCESSING"
             : "STANDBY"}
         </span>
@@ -642,7 +672,7 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <PreprocessVisual image={image} />
+            <PreprocessVisual image={image} analysisData={analysisData} />
           </motion.div>
         )}
 
@@ -654,7 +684,7 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <CNNVisual image={image} />
+            <CNNVisual image={image} analysisData={analysisData} />
           </motion.div>
         )}
 
@@ -668,6 +698,7 @@ function PipelineCore({
           >
             <PCAVisual
               featureCount={featureCount}
+              analysisData={analysisData}
             />
           </motion.div>
         )}
@@ -680,7 +711,7 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <QuantumVisual />
+            <QuantumVisual analysisData={analysisData} />
           </motion.div>
         )}
 
@@ -692,7 +723,7 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <EvidenceVisual />
+            <EvidenceVisual analysisData={analysisData} />
           </motion.div>
         )}
 
@@ -704,7 +735,7 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <ReasonVisual />
+            <ReasonVisual analysisData={analysisData} />
           </motion.div>
         )}
 
@@ -716,13 +747,18 @@ function PipelineCore({
             exit={{ opacity: 0, scale: 1.05 }}
             transition={{ duration: 0.4 }}
           >
-            <TriageVisual />
+            <TriageVisual 
+              analysisData={analysisData}
+              isLoading={isLoading}
+              isComplete={isComplete}
+              error={error}
+            />
           </motion.div>
         )}
       </div>
 
       <div className="pipeline-footer">
-        <span>LATENCY {DEMO_ANALYSIS.performance.totalLatency}</span>
+        <span>LATENCY {analysisData.performance.totalLatency}</span>
         <span>MODEL ONLINE</span>
         <span>SECURE CHANNEL</span>
       </div>
@@ -782,7 +818,7 @@ function InputVisual({ image }) {
    PREPROCESS
 =========================================================== */
 
-function PreprocessVisual({ image }) {
+function PreprocessVisual({ image, analysisData = DEMO_ANALYSIS }) {
   return (
     <motion.div
       className="process-visual"
@@ -813,7 +849,7 @@ function PreprocessVisual({ image }) {
       </div>
 
       <div className="process-stream">
-        {DEMO_ANALYSIS.preprocessing.steps.map((step, i) => (
+        {analysisData.preprocessing.steps.map((step, i) => (
           <motion.div
             key={step.name}
             initial={{
@@ -841,7 +877,7 @@ function PreprocessVisual({ image }) {
    CNN
 =========================================================== */
 
-function CNNVisual({ image }) {
+function CNNVisual({ image, analysisData = DEMO_ANALYSIS }) {
   const nodes = Array.from({
     length: 18,
   });
@@ -887,7 +923,7 @@ function CNNVisual({ image }) {
       </div>
 
       <div className="cnn-output">
-        <strong>{DEMO_ANALYSIS.cnn.featureDimension}</strong>
+        <strong>{analysisData.cnn.featureDimension}</strong>
         <span>FEATURES</span>
       </div>
     </div>
@@ -898,11 +934,11 @@ function CNNVisual({ image }) {
    PCA
 =========================================================== */
 
-function PCAVisual({ featureCount }) {
+function PCAVisual({ featureCount, analysisData = DEMO_ANALYSIS }) {
   return (
     <div className="pca-visual">
       <div className="dimension-label top">
-        {DEMO_ANALYSIS.pca.inputDimension}D
+        {analysisData.pca.inputDimension}D
       </div>
 
       <div className="particle-field">
@@ -965,7 +1001,7 @@ function PCAVisual({ featureCount }) {
 
       <div className="pca-center">
         <strong>
-          {DEMO_ANALYSIS.pca.inputDimension} → {DEMO_ANALYSIS.pca.outputDimension}
+          {analysisData.pca.inputDimension} → {analysisData.pca.outputDimension}
         </strong>
 
         <span>
@@ -987,7 +1023,7 @@ function activePcaPhase(i) {
    QUANTUM
 =========================================================== */
 
-function QuantumVisual() {
+function QuantumVisual({ analysisData = DEMO_ANALYSIS }) {
   const qubits = [
     "Q0",
     "Q1",
@@ -998,7 +1034,7 @@ function QuantumVisual() {
   return (
     <div className="quantum-visual">
       <div className="quantum-inputs">
-        {DEMO_ANALYSIS.pca.components.map((value, i) => (
+        {analysisData.pca.components.map((value, i) => (
           <span key={i}>{value.toFixed(2)}</span>
         ))}
       </div>
@@ -1057,7 +1093,7 @@ function QuantumVisual() {
         </span>
 
         <strong>
-          {DEMO_ANALYSIS.quantum.measurement.toFixed(3)}
+          {analysisData.quantum.measurement.toFixed(3)}
         </strong>
       </div>
     </div>
@@ -1068,7 +1104,7 @@ function QuantumVisual() {
    EVIDENCE
 =========================================================== */
 
-function EvidenceVisual() {
+function EvidenceVisual({ analysisData = DEMO_ANALYSIS }) {
   return (
     <div className="evidence-visual">
       <div className="vector-core">
@@ -1084,7 +1120,7 @@ function EvidenceVisual() {
       </div>
 
       <div className="evidence-cards">
-        {DEMO_ANALYSIS.evidence.results.map(
+        {analysisData.evidence.results.map(
           (result, i) => (
             <motion.div
               className="evidence-card"
@@ -1124,7 +1160,7 @@ function EvidenceVisual() {
    REASONING
 =========================================================== */
 
-function ReasonVisual() {
+function ReasonVisual({ analysisData = DEMO_ANALYSIS }) {
   return (
     <div className="reason-visual">
       <div className="reason-orbit">
@@ -1134,14 +1170,14 @@ function ReasonVisual() {
       <div className="reason-node n1">
         MODEL
         <strong>
-          {(DEMO_ANALYSIS.quantum.confidence * 100).toFixed(1)}%
+          {(analysisData.quantum.confidence * 100).toFixed(1)}%
         </strong>
       </div>
 
       <div className="reason-node n2">
         EVIDENCE
         <strong>
-          {DEMO_ANALYSIS.evidence.results.length} SOURCES
+          {analysisData.evidence.results.length} SOURCES
         </strong>
       </div>
 
@@ -1171,9 +1207,74 @@ function ReasonVisual() {
    TRIAGE
 =========================================================== */
 
-function TriageVisual() {
-  const confidence = DEMO_ANALYSIS.triage.confidence;
+function TriageVisual({ 
+  analysisData = DEMO_ANALYSIS,
+  isLoading = false,
+  isComplete = false,
+  error = null,
+}) {
+  const confidence = analysisData.triage.confidence;
   const confidencePercent = (confidence * 100).toFixed(1);
+
+  // Show error state
+  if (error) {
+    return (
+      <motion.div
+        className="triage-visual"
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+      >
+        <div className="triage-icon" style={{ color: "#ff4444" }}>
+          <AlertCircle size={30} />
+        </div>
+
+        <span className="triage-caption" style={{ color: "#ff4444" }}>
+          ANALYSIS ERROR
+        </span>
+
+        <h3 style={{ fontSize: "1.1rem", color: "#ff8888" }}>
+          Unable to analyze image
+        </h3>
+
+        <p style={{ fontSize: "0.9rem", color: "#999", marginTop: "1rem" }}>
+          {error}
+        </p>
+
+        <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "1rem" }}>
+          Please ensure the backend API is running at http://localhost:8000
+        </p>
+      </motion.div>
+    );
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <motion.div
+        className="triage-visual"
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+      >
+        <motion.div
+          className="triage-icon"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        >
+          <Activity size={30} />
+        </motion.div>
+
+        <span className="triage-caption">
+          ANALYZING
+        </span>
+
+        <h3>Processing X-ray...</h3>
+
+        <p style={{ fontSize: "0.9rem", color: "#999", marginTop: "1rem" }}>
+          Running CNN + PCA + SVM inference
+        </p>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -1192,11 +1293,11 @@ function TriageVisual() {
       </div>
 
       <span className="triage-caption">
-        AI-ASSISTED TRIAGE
+        {isComplete ? "LIVE ANALYSIS COMPLETE" : "AI-ASSISTED TRIAGE"}
       </span>
 
       <h3>
-        {DEMO_ANALYSIS.triage.classification}
+        {analysisData.triage.prediction}
       </h3>
 
       <div className="confidence">
@@ -1225,15 +1326,55 @@ function TriageVisual() {
         </div>
       </div>
 
+      {/* Show probabilities for both classes */}
+      {isComplete && analysisData.classical?.probability && (
+        <div className="probability-breakdown" style={{ marginTop: "1.5rem" }}>
+          <div style={{ fontSize: "0.85rem", color: "#888", marginBottom: "0.5rem" }}>
+            CLASS PROBABILITIES
+          </div>
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "0.8rem", color: "#aaa" }}>NORMAL</div>
+              <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#0ff" }}>
+                {(analysisData.classical.probability.normal * 100).toFixed(1)}%
+              </div>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: "0.8rem", color: "#aaa" }}>PNEUMONIA</div>
+              <div style={{ fontSize: "1.1rem", fontWeight: "600", color: "#0ff" }}>
+                {(analysisData.classical.probability.pneumonia * 100).toFixed(1)}%
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="priority">
         <span>
           PRIORITY
         </span>
 
         <strong>
-          {DEMO_ANALYSIS.triage.priority}
+          {analysisData.triage.priority}
         </strong>
       </div>
+
+      {/* Show medical disclaimer */}
+      {isComplete && (
+        <div style={{ 
+          marginTop: "1.5rem", 
+          padding: "0.75rem", 
+          background: "rgba(255,200,0,0.1)", 
+          border: "1px solid rgba(255,200,0,0.3)",
+          borderRadius: "4px",
+          fontSize: "0.75rem",
+          color: "#ffcc00",
+          lineHeight: "1.4"
+        }}>
+          <CheckCircle2 size={12} style={{ display: "inline", marginRight: "0.5rem" }} />
+          {analysisData.triage.disclaimer}
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -1246,6 +1387,7 @@ function SceneDetails({
   stage,
   image,
   fileInputRef,
+  analysisData = DEMO_ANALYSIS,
 }) {
   if (stage === "input") {
     return (
@@ -1299,7 +1441,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.cnn.backbone.toUpperCase()}
+            {analysisData.cnn.backbone.toUpperCase()}
           </strong>
         </div>
 
@@ -1309,7 +1451,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.cnn.featureDimension}D
+            {analysisData.cnn.featureDimension}D
           </strong>
         </div>
       </div>
@@ -1325,7 +1467,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.pca.inputDimension}D
+            {analysisData.pca.inputDimension}D
           </strong>
         </div>
 
@@ -1335,7 +1477,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.pca.outputDimension}D
+            {analysisData.pca.outputDimension}D
           </strong>
         </div>
       </div>
@@ -1351,7 +1493,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.quantum.qubits}
+            {analysisData.quantum.qubits}
           </strong>
         </div>
 
@@ -1403,7 +1545,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {(DEMO_ANALYSIS.quantum.confidence * 100).toFixed(1)}%
+            {(analysisData.quantum.confidence * 100).toFixed(1)}%
           </strong>
         </div>
 
@@ -1413,7 +1555,7 @@ function SceneDetails({
           </span>
 
           <strong>
-            {DEMO_ANALYSIS.evidence.results.length} SOURCES
+            {analysisData.evidence.results.length} SOURCES
           </strong>
         </div>
       </div>

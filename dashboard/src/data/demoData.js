@@ -1,15 +1,14 @@
 /**
  * DEMO DATA FOR Q-MEDTRIAGE FRONTEND
  * 
- * This file contains deterministic mock data used while the Kermany Chest X-Ray
- * dataset is being prepared and the ML pipeline is being implemented.
+ * This file contains deterministic mock data for static educational sections
+ * and UI development. 
  * 
- * ⚠️ TEMPORARY: This demo data shows NODULE detection for UI development.
- * The actual backend will use NORMAL vs PNEUMONIA classification (Kermany dataset).
- * Frontend will be updated to reflect PNEUMONIA detection once backend is integrated.
- * These values are clearly separated from future real model outputs.
- * When backend integration is complete, this data will be replaced by
- * actual API responses.
+ * ⚠️ IMPORTANT: This demo data is ONLY used for educational/illustrative sections.
+ * Live predictions from uploaded X-rays use the REAL backend API and display
+ * actual Classical SVM results (NORMAL vs PNEUMONIA classification).
+ * 
+ * These values are clearly separated from real model outputs.
  */
 
 export const DEMO_ANALYSIS = {
@@ -51,11 +50,11 @@ export const DEMO_ANALYSIS = {
   // Classical SVM classifier
   classical: {
     model: "SVM",
-    prediction: "Nodule",
+    prediction: "PNEUMONIA",
     confidence: 0.923,
     probability: {
-      nodule: 0.923,
-      nonNodule: 0.077,
+      normal: 0.077,
+      pneumonia: 0.923,
     },
   },
 
@@ -66,11 +65,11 @@ export const DEMO_ANALYSIS = {
     featureMap: "ZZFeatureMap",
     backend: "qasm_simulator",
     shots: 1024,
-    prediction: "Nodule",
+    prediction: "PNEUMONIA",
     confidence: 0.947,
     probability: {
-      nodule: 0.947,
-      nonNodule: 0.053,
+      normal: 0.053,
+      pneumonia: 0.947,
     },
     measurement: 0.947,
   },
@@ -81,16 +80,16 @@ export const DEMO_ANALYSIS = {
     embeddingModel: "sentence-transformers",
     results: [
       {
-        title: "Imaging characteristics of pulmonary nodules",
+        title: "Pneumonia imaging characteristics",
         relevance: 0.92,
         source: "Medical Knowledge Base",
-        snippet: "Round opacity in lung parenchyma...",
+        snippet: "Consolidation patterns in lung parenchyma...",
       },
       {
-        title: "Clinical guidelines for nodule assessment",
+        title: "Clinical guidelines for pneumonia assessment",
         relevance: 0.85,
         source: "Clinical References",
-        snippet: "Size, shape, and density evaluation...",
+        snippet: "Evidence-based diagnostic criteria...",
       },
       {
         title: "Relevant diagnostic criteria",
@@ -107,19 +106,19 @@ export const DEMO_ANALYSIS = {
     synthesis: "grounded",
     inputSources: ["model_output", "evidence", "image_context"],
     explanation:
-      "The quantum classifier detected a nodular pattern with high confidence (94.7%). " +
-      "This finding is supported by retrieved medical evidence regarding pulmonary nodule " +
-      "characteristics. The model's attention focused on a region consistent with typical " +
-      "nodule presentation.",
+      "The quantum classifier detected PNEUMONIA with high confidence (94.7%). " +
+      "This finding is supported by retrieved medical evidence regarding pneumonia " +
+      "characteristics. The model's attention focused on regions consistent with typical " +
+      "pneumonia presentation.",
   },
 
   // Final triage result
   triage: {
     classification: "ABNORMAL",
-    prediction: "Nodule",
+    prediction: "PNEUMONIA",
     confidence: 0.947,
     priority: "HIGH",
-    recommendation: "Further radiological assessment recommended",
+    recommendation: "Clinical evaluation recommended for suspected pneumonia",
     disclaimer: "AI-assisted decision support. Not a medical diagnosis.",
   },
 

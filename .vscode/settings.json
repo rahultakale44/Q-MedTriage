@@ -1,0 +1,31 @@
+{
+    // Python interpreter configuration
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    
+    // Terminal configuration - auto-activate virtual environment
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    
+    // Python testing configuration
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    
+    // Linting and formatting
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    
+    // Code analysis
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    
+    // Virtual environment management
+    "python.venvPath": "${workspaceFolder}",
+    "python.venvFolders": [
+        ".venv",
+        "venv",
+        "env"
+    ]
+}

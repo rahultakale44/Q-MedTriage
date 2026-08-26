@@ -1,0 +1,40 @@
+{
+    "model": "Quantum SVM",
+    "algorithm": "QSVC",
+    "feature_dimension": 4,
+    "qubits": 4,
+    "feature_map": "ZZFeatureMap",
+    "reps": 2,
+    "entanglement": "linear",
+    "C": 1.0,
+    "probability": true,
+    "random_state": 42,
+    "training_samples_full": 4172,
+    "training_samples_used": 500,
+    "test_samples": 624,
+    "training_class_distribution": {
+        "NORMAL": 128,
+        "PNEUMONIA": 372
+    },
+    "test_class_distribution": {
+        "NORMAL": 234,
+        "PNEUMONIA": 390
+    },
+    "metrics": {
+        "accuracy": 0.6121794871794872,
+        "precision": 0.6217105263157895,
+        "recall": 0.9692307692307692,
+        "f1_score": 0.7575150300601202,
+        "confusion_matrix": [
+            [
+                4,
+                230
+            ],
+            [
+                12,
+                378
+            ]
+        ],
+        "roc_auc": 0.47033749726057417
+    }
+}

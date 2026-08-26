@@ -1,0 +1,43 @@
+{
+  "training_date": "2026-08-26T01:34:56.975567",
+  "model_type": "Classical SVM",
+  "input_dimension": 4,
+  "feature_source": "PCA-reduced ResNet50 features",
+  "random_seed": 42,
+  "configuration": {
+    "kernel": "rbf",
+    "C": 1.0,
+    "gamma": "scale"
+  },
+  "dataset": {
+    "train_samples": 4172,
+    "val_samples": 1044,
+    "test_samples": 624,
+    "class_names": [
+      "NORMAL",
+      "PNEUMONIA"
+    ],
+    "class_mapping": {
+      "NORMAL": 0,
+      "PNEUMONIA": 1
+    }
+  },
+  "validation_metrics": {
+    "accuracy": 0.9204980842911877,
+    "precision": 0.9516971279373369,
+    "recall": 0.9406451612903226,
+    "f1_score": 0.9461388708630759,
+    "roc_auc": 0.9719630651157213,
+    "confusion_matrix": [
+      [
+        232,
+        37
+      ],
+      [
+        46,
+        729
+      ]
+    ]
+  },
+  "test_metrics": null
+}

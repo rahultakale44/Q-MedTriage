@@ -31,8 +31,12 @@ logs/
 .DS_Store
 Thumbs.db
 
-# IDE
-.vscode/
+# IDE - allow .vscode/settings.json but exclude workspace state
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/extensions.json
 
 # Large files
 *.zip

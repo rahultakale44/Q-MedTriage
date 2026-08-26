@@ -55,24 +55,41 @@ def root():
 
 @app.get("/health")
 def health():
+    quantum_available = (
+        PIPELINE_LOADED and 
+        hasattr(inference_pipeline, 'quantum_model') and 
+        inference_pipeline.quantum_model is not None
+    )
+    
     return {
         "api": "online",
         "vision_model": "ready" if PIPELINE_LOADED else "failed",
         "classical_svm": "ready" if PIPELINE_LOADED else "failed",
-        "quantum_model": "available" if PIPELINE_LOADED else "unavailable",
+        "quantum_svm": "ready" if quantum_available else "unavailable",
         "rag": "pending",
         "pipeline_loaded": PIPELINE_LOADED
     }
 
 
 @app.post("/predict")
-async def predict(file: UploadFile = File(...)):
+async def predict(file: UploadFile = File(...), classifier: str = "classical"):
     """
     Predict pneumonia from chest X-ray image
+    
+    Args:
+        file: Uploaded chest X-ray image
+        classifier: "classical" (default) or "quantum"
     
     Returns:
         JSON with prediction, confidence, probabilities, and disclaimer
     """
+    # Validate classifier parameter
+    if classifier not in ["classical", "quantum"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid classifier: {classifier}. Must be 'classical' or 'quantum'"
+        )
+    
     # Check if pipeline is loaded
     if not PIPELINE_LOADED:
         raise HTTPException(
@@ -92,17 +109,24 @@ async def predict(file: UploadFile = File(...)):
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
         
-        # Run inference
-        result = inference_pipeline.predict(image, include_features=False)
+        # Run inference with selected classifier
+        result = inference_pipeline.predict(image, classifier=classifier, include_features=False)
         
         if not result["success"]:
+            # Handle specific error cases
+            if result.get("error_type") == "ModelNotAvailableError":
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"Quantum SVM model not available"
+                )
             raise HTTPException(
                 status_code=500,
                 detail=f"Prediction failed: {result.get('error', 'Unknown error')}"
             )
         
-        # Add filename to response
+        # Add filename and classifier to response
         result["filename"] = file.filename
+        result["classifier"] = classifier
         
         return JSONResponse(content=result)
         

@@ -4,7 +4,7 @@ End-to-End Inference Pipeline for Q-MedTriage
 This module provides the complete inference workflow:
 Image → Preprocessing → Feature Extraction → PCA → Classification → Result
 
-Uses the validated Classical SVM as the primary production model.
+Supports both Classical SVM and Quantum SVM classifiers.
 """
 
 import torch
@@ -16,6 +16,15 @@ import joblib
 from pathlib import Path
 from typing import Union, Dict, Optional
 import time
+
+# Import QuantumSVM at module level to avoid import order issues
+try:
+    from src.models.quantum_svm import QuantumSVM
+    QUANTUM_SVM_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Could not import QuantumSVM: {e}")
+    QUANTUM_SVM_AVAILABLE = False
+    QuantumSVM = None
 
 
 class ChestXRayInference:
@@ -34,6 +43,7 @@ class ChestXRayInference:
         self,
         pca_model_path: str = "models/pca_reducer.pkl",
         svm_model_path: str = "models/classical_svm.pkl",
+        quantum_svm_path: str = "models/quantum_svm.pkl",
         device: str = "auto"
     ):
         """
@@ -41,7 +51,8 @@ class ChestXRayInference:
         
         Args:
             pca_model_path: Path to trained PCA model
-            svm_model_path: Path to trained SVM model
+            svm_model_path: Path to trained Classical SVM model
+            quantum_svm_path: Path to trained Quantum SVM model
             device: Device for ResNet50 ('cpu', 'cuda', or 'auto')
         """
         self.device = self._get_device(device)
@@ -54,6 +65,9 @@ class ChestXRayInference:
         self.pca_model = self._load_pca(pca_model_path)
         self.svm_model = self._load_svm(svm_model_path)
         self.resnet_model = self._load_resnet()
+        
+        # Try to load quantum model (optional)
+        self.quantum_model = self._load_quantum_svm(quantum_svm_path)
         
         # Define preprocessing (MUST match training preprocessing exactly)
         self.transform = transforms.Compose([
@@ -97,6 +111,33 @@ class ChestXRayInference:
         svm_model = joblib.load(svm_path)
         print(f"✓ SVM model loaded: {svm_path}")
         return svm_model
+    
+    def _load_quantum_svm(self, path: str):
+        """Load trained Quantum SVM model (optional)"""
+        if not QUANTUM_SVM_AVAILABLE:
+            print("WARNING: QuantumSVM class not available (import failed)")
+            print("  Quantum classifier will not be available")
+            return None
+        
+        quantum_path = Path(path)
+        if not quantum_path.exists():
+            print(f"WARNING: Quantum SVM not found: {quantum_path}")
+            print("  Quantum classifier will not be available")
+            return None
+        
+        try:
+            # Load the model using the pre-imported QuantumSVM class
+            quantum_model = QuantumSVM.load(str(quantum_path))
+            print(f"SUCCESS: Quantum SVM loaded: {quantum_path}")
+            return quantum_model
+            
+        except Exception as e:
+            print(f"ERROR: Failed to load Quantum SVM: {e}")
+            print(f"  Error type: {type(e).__name__}")
+            import traceback
+            traceback.print_exc()
+            print("  Quantum classifier will not be available")
+            return None
     
     def _load_resnet(self):
         """Load ResNet50 feature extractor"""
@@ -182,7 +223,7 @@ class ChestXRayInference:
     
     def classify(self, pca_features: np.ndarray) -> Dict:
         """
-        Classify using trained SVM
+        Classify using trained Classical SVM
         
         Args:
             pca_features: PCA-reduced features (4,)
@@ -207,9 +248,50 @@ class ChestXRayInference:
             "confidence": float(probabilities[prediction]),
         }
     
+    def classify_quantum(self, pca_features: np.ndarray) -> Dict:
+        """
+        Classify using trained Quantum SVM
+        
+        Args:
+            pca_features: PCA-reduced features (4,)
+        
+        Returns:
+            Classification result with probabilities (if available)
+        """
+        if self.quantum_model is None:
+            raise ValueError("Quantum SVM model not loaded")
+        
+        # Reshape to (1, 4) for sklearn-compatible interface
+        features_2d = pca_features.reshape(1, -1)
+        
+        # Predict
+        prediction = self.quantum_model.predict(features_2d)[0]
+        prediction_label = self.class_names[prediction]
+        
+        result = {
+            "prediction": int(prediction),
+            "prediction_label": prediction_label,
+        }
+        
+        # Add probabilities if available
+        if self.quantum_model.probability:
+            probabilities = self.quantum_model.predict_proba(features_2d)[0]
+            result["probabilities"] = {
+                "NORMAL": float(probabilities[0]),
+                "PNEUMONIA": float(probabilities[1]),
+            }
+            result["confidence"] = float(probabilities[prediction])
+        else:
+            # Quantum model doesn't provide calibrated probabilities
+            result["probabilities"] = None
+            result["confidence"] = None
+        
+        return result
+    
     def predict(
         self, 
         image_input: Union[str, Path, Image.Image],
+        classifier: str = "classical",
         include_features: bool = False
     ) -> Dict:
         """
@@ -217,12 +299,29 @@ class ChestXRayInference:
         
         Args:
             image_input: Image file path or PIL Image
+            classifier: "classical" or "quantum"
             include_features: Whether to include intermediate features in response
         
         Returns:
             Prediction result dictionary
         """
         start_time = time.time()
+        
+        # Validate classifier choice
+        if classifier not in ["classical", "quantum"]:
+            return {
+                "success": False,
+                "error": f"Invalid classifier: {classifier}. Must be 'classical' or 'quantum'",
+                "error_type": "ValueError",
+            }
+        
+        # Check if quantum model is available
+        if classifier == "quantum" and self.quantum_model is None:
+            return {
+                "success": False,
+                "error": "Quantum SVM model not loaded",
+                "error_type": "ModelNotAvailableError",
+            }
         
         try:
             # 1. Preprocess
@@ -235,7 +334,14 @@ class ChestXRayInference:
             pca_features = self.apply_pca(resnet_features)
             
             # 4. Classify
-            classification = self.classify(pca_features)
+            if classifier == "classical":
+                classification = self.classify(pca_features)
+                model_name = "Classical SVM"
+                model_type = "classical"
+            else:  # quantum
+                classification = self.classify_quantum(pca_features)
+                model_name = "Quantum SVM"
+                model_type = "quantum"
             
             # Calculate inference time
             inference_time = time.time() - start_time
@@ -243,12 +349,12 @@ class ChestXRayInference:
             # Build response
             result = {
                 "success": True,
-                "model": "Classical SVM",
-                "model_type": "classical",
+                "model": model_name,
+                "model_type": model_type,
                 "prediction": classification["prediction"],
                 "prediction_label": classification["prediction_label"],
-                "confidence": classification["confidence"],
-                "probabilities": classification["probabilities"],
+                "confidence": classification.get("confidence"),
+                "probabilities": classification.get("probabilities"),
                 "inference_time_ms": round(inference_time * 1000, 2),
                 "disclaimer": (
                     "AI-assisted triage prediction for research purposes. "

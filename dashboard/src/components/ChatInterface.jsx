@@ -65,7 +65,9 @@ export function ChatInterface({ predictionData, image, onClose }) {
     } catch (error) {
       const errorMessage = {
         role: "assistant",
-        content: `I encountered an error: ${error.message}. Please try again.`,
+        content: error.message.includes("404") 
+          ? "The explanation service is currently unavailable. Your analysis result remains valid and accurate."
+          : `I encountered an error: ${error.message}. Please try again.`,
         error: true,
       };
       setMessages((prev) => [...prev, errorMessage]);

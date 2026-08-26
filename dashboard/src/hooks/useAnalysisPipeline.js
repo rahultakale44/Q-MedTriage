@@ -24,42 +24,42 @@ export const STAGES = {
   CHAT: "chat",
 };
 
-// Stage display metadata
+// Stage display metadata with SLOWER, more engaging durations
 export const STAGE_INFO = {
   [STAGES.SCANNING]: {
     label: "IMAGE ANALYSIS",
     title: "Scanning medical image",
-    duration: 2000,
+    duration: 3500, // Was 2000, now 3.5s
   },
   [STAGES.PREPROCESSING]: {
     label: "PREPROCESSING",
     title: "Clean the signal",
-    duration: 1500,
+    duration: 3000, // Was 1500, now 3s
   },
   [STAGES.FEATURE_EXTRACTION]: {
     label: "FEATURE EXTRACTION",
     title: "See the patterns",
-    duration: 2000,
+    duration: 4000, // Was 2000, now 4s
   },
   [STAGES.DIMENSIONALITY_REDUCTION]: {
     label: "DIMENSIONALITY REDUCTION",
     title: "Compress intelligence",
-    duration: 1500,
+    duration: 4000, // Was 1500, now 4s
   },
   [STAGES.QUANTUM_PROCESSING]: {
     label: "QUANTUM CLASSIFICATION",
     title: "Enter the quantum core",
-    duration: 2500,
+    duration: 7000, // Was 2500, now 7s (6-8s range)
   },
   [STAGES.EVIDENCE_RETRIEVAL]: {
     label: "EVIDENCE RETRIEVAL",
     title: "Bring the evidence",
-    duration: 2000,
+    duration: 4000, // Was 2000, now 4s
   },
   [STAGES.REASONING]: {
     label: "AI REASONING",
     title: "Connect the dots",
-    duration: 2000,
+    duration: 4000, // Was 2000, now 4s
   },
 };
 
@@ -69,9 +69,15 @@ export function useAnalysisPipeline() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const stageTimeoutRef = useRef(null);
+  const predictionStatusRef = useRef({ isComplete: false, error: null });
 
   // Use existing prediction hook for real API integration
   const { isLoading, isComplete, result, error, predict } = usePrediction();
+
+  // Update prediction status ref whenever prediction state changes
+  useEffect(() => {
+    predictionStatusRef.current = { isComplete, error };
+  }, [isComplete, error]);
 
   /**
    * Navigate to a specific stage
@@ -163,19 +169,34 @@ export function useAnalysisPipeline() {
 
       // Quantum processing (wait for real API to complete here)
       await new Promise(resolve => {
+        const minDuration = STAGE_INFO[STAGES.QUANTUM_PROCESSING].duration;
+        const startTime = Date.now();
+        
         const checkCompletion = () => {
-          if (isComplete || error) {
-            completeStage(STAGES.EVIDENCE_RETRIEVAL);
-            resolve();
+          const elapsed = Date.now() - startTime;
+          const { isComplete: predComplete, error: predError } = predictionStatusRef.current;
+          
+          // Check if prediction is complete or failed
+          if (predComplete || predError) {
+            // Ensure minimum visual duration
+            const remaining = minDuration - elapsed;
+            if (remaining > 0) {
+              stageTimeoutRef.current = setTimeout(() => {
+                completeStage(STAGES.EVIDENCE_RETRIEVAL);
+                resolve();
+              }, remaining);
+            } else {
+              completeStage(STAGES.EVIDENCE_RETRIEVAL);
+              resolve();
+            }
           } else {
-            setTimeout(checkCompletion, 200);
+            // Check again in 200ms
+            stageTimeoutRef.current = setTimeout(checkCompletion, 200);
           }
         };
         
-        // Start checking after minimum visual duration
-        stageTimeoutRef.current = setTimeout(() => {
-          checkCompletion();
-        }, STAGE_INFO[STAGES.QUANTUM_PROCESSING].duration);
+        // Start checking after a brief delay
+        stageTimeoutRef.current = setTimeout(checkCompletion, 500);
       });
 
       // Evidence retrieval
@@ -196,7 +217,7 @@ export function useAnalysisPipeline() {
     };
 
     progressPipeline();
-  }, [imageFile, predict, isComplete, error, goToStage, completeStage]);
+  }, [imageFile, predict, goToStage, completeStage]);
 
   /**
    * Reset pipeline

@@ -992,6 +992,11 @@
   border-radius: 50%;
 }
 
+.status-dot.complete {
+  background: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+}
+
 /* ============================================
    EVIDENCE RETRIEVAL STAGE
 ============================================ */

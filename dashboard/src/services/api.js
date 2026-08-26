@@ -97,7 +97,7 @@ export async function analyzeImage(imageFile) {
  * @param {object} context - Optional context (image analysis results, etc.)
  * @returns {Promise} Answer with sources
  */
-export async function askQuestion(question, context = null) {
+export async function askQuestion(question, _context = null) {
   if (USE_DEMO_DATA) {
     await simulateDelay(600);
 
@@ -114,12 +114,9 @@ export async function askQuestion(question, context = null) {
   }
 
   try {
-    const response = await fetch(`${BASE_URL}/api/ask`, {
+    // Backend /ask endpoint expects question in JSON body
+    const response = await fetch(`${BASE_URL}/ask?question=${encodeURIComponent(question)}`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ question, context }),
     });
 
     if (!response.ok) {

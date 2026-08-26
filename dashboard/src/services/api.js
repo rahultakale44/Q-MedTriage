@@ -67,7 +67,7 @@ export async function analyzeImage(imageFile) {
     const formData = new FormData();
     formData.append("file", imageFile);
 
-    const response = await fetch(`${BASE_URL}/api/analyze`, {
+    const response = await fetch(`${BASE_URL}/predict`, {
       method: "POST",
       body: formData,
     });

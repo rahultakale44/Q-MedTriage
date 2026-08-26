@@ -6,6 +6,5 @@ for the Q-MedTriage Intelligence Layer.
 """
 
 from .document_loader import MedicalKnowledgeLoader
-from .retriever import RAGRetriever
 
-__all__ = ["MedicalKnowledgeLoader", "RAGRetriever"]
+__all__ = ["MedicalKnowledgeLoader"]

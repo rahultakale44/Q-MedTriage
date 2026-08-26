@@ -637,6 +637,10 @@ button:focus-visible {
 
 .story {
   position: relative;
+  
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr);
+  gap: 0;
 }
 
 .story-sticky {
@@ -668,9 +672,9 @@ button:focus-visible {
 .pipeline-header {
   position: absolute;
 
-  left: 5vw;
+  left: 3vw;
   top: 32px;
-  right: 5vw;
+  right: 3vw;
 
   display: flex;
   justify-content: space-between;
@@ -732,7 +736,7 @@ button:focus-visible {
 .pipeline-stage-label {
   position: absolute;
 
-  left: 9vw;
+  left: 3vw;
   top: 50%;
 
   transform: translateY(-50%);
@@ -776,8 +780,8 @@ button:focus-visible {
   left: 50%;
   top: 50%;
 
-  width: min(680px, 52vw);
-  height: min(580px, 70vh);
+  width: min(680px, 90%);
+  height: min(620px, 75vh);
 
   transform: translate(-50%, -50%);
 
@@ -789,8 +793,8 @@ button:focus-visible {
   position: absolute;
 
   bottom: 30px;
-  left: 5vw;
-  right: 5vw;
+  left: 3vw;
+  right: 3vw;
 
   display: flex;
   justify-content: space-between;
@@ -833,7 +837,7 @@ button:focus-visible {
   position: absolute;
 
   bottom: 30px;
-  right: 5vw;
+  right: 3vw;
 
   display: flex;
   gap: 25px;
@@ -850,27 +854,25 @@ button:focus-visible {
 
   z-index: 3;
 
-  margin-top: -100vh;
+  margin-top: 0;
 }
 
 .scene {
   position: relative;
 
-  height: 100vh;
-  min-height: 700px;
+  min-height: 110vh;
 
   display: flex;
   align-items: center;
 
-  padding: 0 9vw;
+  padding: 0 5vw 0 3vw;
 
   pointer-events: none;
 }
 
 .scene-copy {
-  width: 390px;
-
-  margin-left: auto;
+  width: 100%;
+  max-width: 520px;
 
   pointer-events: auto;
 }
@@ -2136,19 +2138,20 @@ footer {
   }
 
   .visual-center {
-    left: 58%;
+    width: min(600px, 90%);
+    height: min(580px, 72vh);
   }
 
   .pipeline-stage-label {
-    left: 5vw;
+    left: 3vw;
   }
 
   .scene {
-    padding: 0 6vw;
+    padding: 0 4vw 0 2vw;
   }
 
   .scene-copy {
-    width: 350px;
+    max-width: 450px;
   }
 }
 
@@ -2175,10 +2178,23 @@ footer {
       scale(0.9);
   }
 
-  .scene-copy {
-    margin-left: 0;
+  /* Switch to single column on tablet */
+  .story {
+    grid-template-columns: 1fr;
+  }
 
-    width: 340px;
+  .story-track {
+    margin-top: -100vh;
+  }
+
+  .scene {
+    padding: 0 7vw;
+    min-height: 100vh;
+  }
+
+  .scene-copy {
+    margin-left: auto;
+    max-width: 380px;
   }
 
   .pipeline-stage-label {
@@ -2187,12 +2203,12 @@ footer {
   }
 
   .visual-center {
-    left: 62%;
-    top: 58%;
+    left: 50%;
+    top: 52%;
 
     transform:
       translate(-50%, -50%)
-      scale(0.72);
+      scale(0.75);
   }
 
   .system-chain {
@@ -2243,14 +2259,21 @@ footer {
   }
 
   .visual-center {
-    left: 64%;
+    left: 50%;
+    top: 54%;
     transform:
       translate(-50%, -50%)
-      scale(0.62);
+      scale(0.65);
+  }
+
+  .scene {
+    padding: 0 6vw;
+    min-height: 100vh;
   }
 
   .scene-copy {
-    width: 320px;
+    width: 100%;
+    max-width: 340px;
   }
 
   .scene h2 {
@@ -2362,10 +2385,18 @@ footer {
      MOBILE STORY
   --------------------------------------------- */
 
+  .story {
+    grid-template-columns: 1fr;
+  }
+
   .story-sticky {
     top: 76px;
 
     height: calc(100svh - 76px);
+  }
+
+  .story-track {
+    margin-top: -100vh;
   }
 
   .pipeline-header {

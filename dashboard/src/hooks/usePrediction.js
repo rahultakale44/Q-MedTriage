@@ -21,6 +21,8 @@ export function usePrediction() {
    * Predict pneumonia from uploaded chest X-ray
    */
   const predict = useCallback(async (imageFile) => {
+    console.log("[usePrediction] Starting prediction...");
+    
     // Reset state
     setPredictionState({
       isLoading: true,
@@ -34,11 +36,15 @@ export function usePrediction() {
       const formData = new FormData();
       formData.append("file", imageFile);
 
+      console.log("[usePrediction] Sending POST to", `${API_URL}/predict`);
+      
       // Call API
       const response = await fetch(`${API_URL}/predict`, {
         method: "POST",
         body: formData,
       });
+
+      console.log("[usePrediction] Response status:", response.status, response.statusText);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -48,6 +54,7 @@ export function usePrediction() {
       }
 
       const data = await response.json();
+      console.log("[usePrediction] Raw API response:", data);
 
       // Validate response
       if (!data.success) {
@@ -201,9 +208,12 @@ export function usePrediction() {
         error: null,
       });
 
+      console.log("[usePrediction] Transformed result stored in state:", transformedResult);
+      console.log("[usePrediction] State updated - isComplete: true");
+
       return transformedResult;
     } catch (error) {
-      console.error("Prediction error:", error);
+      console.error("[usePrediction] Prediction error:", error);
 
       setPredictionState({
         isLoading: false,

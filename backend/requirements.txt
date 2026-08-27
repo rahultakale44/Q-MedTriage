@@ -1,0 +1,44 @@
+# Q-MedTriage Python Dependencies
+
+# Core ML/DL frameworks
+torch>=2.0.0
+torchvision>=0.15.0
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Quantum computing
+qiskit>=0.45.0
+qiskit-machine-learning>=0.7.0
+qiskit-aer>=0.13.0
+
+# Image processing
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# Explainability
+grad-cam>=1.4.0
+
+# Vector database & embeddings (Intelligence Layer)
+faiss-cpu>=1.7.4
+sentence-transformers>=2.2.0
+
+# LLM & NLP (Intelligence Layer)
+openai>=1.0.0
+transformers>=4.30.0
+python-dotenv>=1.0.0
+
+# API framework
+fastapi>=0.104.0
+uvicorn>=0.24.0
+python-multipart>=0.0.6
+
+# Utilities
+tqdm>=4.66.0
+joblib>=1.3.0
+pyyaml>=6.0.0
+
+# Development
+jupyter>=1.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0

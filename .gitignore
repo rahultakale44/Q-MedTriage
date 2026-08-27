@@ -49,3 +49,11 @@ Thumbs.db
 
 # Temporary files
 *.tmp
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Old dashboard cache (if still locked)
+dashboard/

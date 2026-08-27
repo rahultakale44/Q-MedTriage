@@ -1,0 +1,525 @@
+/**
+ * FEATURE EXTRACTION STAGE - Compact Professional Design
+ * Dark theme, minimal bright colors, information-dense layout
+ */
+
+/* ============================================
+   MAIN PIPELINE LAYOUT
+============================================ */
+
+.feature-pipeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: rgba(0, 15, 30, 0.6);
+  border: 1px solid rgba(0, 100, 150, 0.2);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.feature-main-pipeline {
+  display: grid;
+  grid-template-columns: 240px auto 1fr auto 240px;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+/* ============================================
+   PANEL COMMON STYLES
+============================================ */
+
+.feature-panel-compact {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 10, 25, 0.8);
+  border: 1px solid rgba(0, 120, 160, 0.25);
+  border-radius: 10px;
+  padding: 1rem;
+  min-height: 320px;
+}
+
+.panel-header-compact {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.panel-title-compact {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: monospace;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.panel-subtitle-compact {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 400;
+}
+
+.panel-content-compact {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ============================================
+   LEFT PANEL - MODEL INPUT
+============================================ */
+
+.input-image-container {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(0, 150, 180, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  padding: 0.4rem;
+}
+
+.input-xray-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+}
+
+.corner-frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.corner-accent {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(0, 180, 220, 0.7);
+}
+
+.corner-accent.tl {
+  top: 0.75rem;
+  left: 0.75rem;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-accent.tr {
+  top: 0.75rem;
+  right: 0.75rem;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-accent.bl {
+  bottom: 0.75rem;
+  left: 0.75rem;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-accent.br {
+  bottom: 0.75rem;
+  right: 0.75rem;
+  border-left: none;
+  border-top: none;
+}
+
+/* ============================================
+   CENTER PANEL - CNN ARCHITECTURE
+============================================ */
+
+.feature-process-container {
+  flex: 1;
+  min-width: 0;
+}
+
+.cnn-architecture {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem 1rem;
+  min-height: 240px;
+}
+
+.conv-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.conv-feature-map {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.feature-map-stack {
+  position: relative;
+  transform-style: preserve-3d;
+  perspective: 400px;
+}
+
+.feature-map-layer {
+  position: absolute;
+  background: rgba(0, 100, 140, 0.35);
+  border: 1px solid rgba(0, 150, 200, 0.4);
+  border-radius: 4px;
+  box-shadow: 
+    0 2px 8px rgba(0, 150, 200, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.conv-stage-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding-top: 0.5rem;
+}
+
+.conv-stage-name {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(0, 200, 240, 0.85);
+  font-family: monospace;
+  letter-spacing: 0.03em;
+}
+
+.conv-stage-filters {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: monospace;
+}
+
+.cnn-description-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  background: rgba(0, 20, 40, 0.5);
+  border: 1px solid rgba(0, 100, 150, 0.2);
+  border-radius: 6px;
+}
+
+.cnn-desc-icon {
+  color: rgba(0, 200, 240, 0.7);
+  flex-shrink: 0;
+}
+
+.cnn-desc-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cnn-desc-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cnn-desc-text {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+}
+
+/* ============================================
+   RIGHT PANEL - FEATURE VECTOR
+============================================ */
+
+.feature-vector-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 0.75rem;
+}
+
+.vector-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.25rem 0.75rem;
+  background: rgba(0, 100, 150, 0.08);
+  border: 1px solid rgba(0, 150, 200, 0.25);
+  border-radius: 8px;
+  min-height: 180px;
+  justify-content: center;
+  width: 100%;
+  max-width: 180px;
+}
+
+.vector-dot-compact {
+  width: 6px;
+  height: 6px;
+  background: rgba(0, 200, 240, 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 200, 240, 0.4);
+}
+
+.vector-ellipsis {
+  font-size: 1.1rem;
+  color: rgba(0, 200, 240, 0.7);
+  margin: 0.4rem 0;
+  font-weight: 600;
+}
+
+.vector-dimension {
+  font-size: 2rem;
+  font-weight: 600;
+  color: rgba(0, 200, 240, 0.9);
+  font-family: monospace;
+  text-shadow: 0 0 12px rgba(0, 200, 240, 0.3);
+  margin-top: 0.5rem;
+}
+
+.vector-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.5rem;
+}
+
+.vector-description {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: center;
+  line-height: 1.5;
+  max-width: 200px;
+}
+
+/* ============================================
+   FLOW ARROWS
+============================================ */
+
+.pipeline-arrow {
+  color: rgba(0, 180, 220, 0.5);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================
+   METRICS SECTION
+============================================ */
+
+.metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: rgba(0, 10, 25, 0.7);
+  border: 1px solid rgba(0, 100, 150, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.25rem;
+  border-right: 1px solid rgba(0, 100, 150, 0.15);
+  transition: background 0.2s ease;
+}
+
+.metric-item:last-child {
+  border-right: none;
+}
+
+.metric-item:hover {
+  background: rgba(0, 20, 40, 0.6);
+}
+
+.metric-icon-compact {
+  color: rgba(0, 200, 240, 0.75);
+  flex-shrink: 0;
+}
+
+.metric-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.metric-label-compact {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+.metric-value-compact {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: rgba(0, 200, 240, 0.9);
+  font-family: monospace;
+}
+
+/* ============================================
+   EXPLANATION SECTION
+============================================ */
+
+.explanation-compact {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(0, 15, 35, 0.5);
+  border: 1px solid rgba(0, 100, 150, 0.2);
+  border-radius: 10px;
+  align-items: flex-start;
+}
+
+.explanation-icon-compact {
+  color: rgba(0, 200, 240, 0.75);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.explanation-text-container {
+  flex: 1;
+}
+
+.explanation-heading {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(0, 200, 240, 0.85);
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.03em;
+}
+
+.explanation-paragraph {
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+============================================ */
+
+@media (max-width: 1400px) {
+  .feature-main-pipeline {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto auto;
+    gap: 1.5rem;
+  }
+
+  .pipeline-arrow {
+    transform: rotate(90deg);
+  }
+
+  .cnn-architecture {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .metrics-bar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .metric-item:nth-child(2) {
+    border-right: none;
+  }
+
+  .metric-item:nth-child(3) {
+    border-right: 1px solid rgba(0, 100, 150, 0.15);
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-pipeline-container {
+    padding: 1.25rem;
+  }
+
+  .metrics-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-item {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 100, 150, 0.15);
+  }
+
+  .metric-item:last-child {
+    border-bottom: none;
+  }
+
+  .explanation-compact {
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* ============================================
+   ANIMATIONS - MINIMAL & CONTROLLED
+============================================ */
+
+@keyframes subtle-vector-pulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.vector-dot-compact {
+  animation: subtle-vector-pulse 3s ease-in-out infinite;
+}
+
+.vector-dot-compact:nth-child(2n) {
+  animation-duration: 3.5s;
+}
+
+.vector-dot-compact:nth-child(3n) {
+  animation-duration: 4s;
+}
+
+@keyframes subtle-layer-glow {
+  0%, 100% {
+    box-shadow: 
+      0 2px 8px rgba(0, 150, 200, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 2px 12px rgba(0, 150, 200, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+}
+
+.feature-map-layer {
+  animation: subtle-layer-glow 4s ease-in-out infinite;
+}
+
+/* Stagger animations */
+.conv-stage:nth-child(1) .feature-map-layer { animation-delay: 0s; }
+.conv-stage:nth-child(2) .feature-map-layer { animation-delay: 0.3s; }
+.conv-stage:nth-child(3) .feature-map-layer { animation-delay: 0.6s; }
+.conv-stage:nth-child(4) .feature-map-layer { animation-delay: 0.9s; }
+.conv-stage:nth-child(5) .feature-map-layer { animation-delay: 1.2s; }

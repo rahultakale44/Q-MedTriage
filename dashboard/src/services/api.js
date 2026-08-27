@@ -91,13 +91,39 @@ export async function analyzeImage(imageFile) {
 }
 
 /**
+ * Build minimal analysis context from pipeline state for /ask
+ */
+function buildAnalysisContext(context) {
+  const data = context?.prediction;
+  if (!data?.triage) return null;
+
+  const analysisContext = {
+    prediction: data.triage.prediction,
+    confidence: data.triage.confidence,
+    analysis_type: "chest_xray_triage",
+    priority: data.triage.priority,
+    classifier: data.raw?.classifier || "classical",
+    model: data.classical?.model || null,
+  };
+
+  if (data.classical?.probability) {
+    analysisContext.probabilities = {
+      NORMAL: data.classical.probability.normal,
+      PNEUMONIA: data.classical.probability.pneumonia,
+    };
+  }
+
+  return analysisContext;
+}
+
+/**
  * Ask medical question (RAG-based Q&A)
  * 
  * @param {string} question - User's medical question
  * @param {object} context - Optional context (image analysis results, etc.)
  * @returns {Promise} Answer with sources
  */
-export async function askQuestion(question, _context = null) {
+export async function askQuestion(question, context = null) {
   if (USE_DEMO_DATA) {
     await simulateDelay(600);
 
@@ -114,9 +140,13 @@ export async function askQuestion(question, _context = null) {
   }
 
   try {
-    // Backend /ask endpoint expects question in JSON body
+    const analysisContext = buildAnalysisContext(context);
+    const body = analysisContext ? { analysis_context: analysisContext } : {};
+
     const response = await fetch(`${BASE_URL}/ask?question=${encodeURIComponent(question)}`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

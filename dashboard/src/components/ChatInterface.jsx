@@ -57,6 +57,7 @@ export function ChatInterface({ predictionData, image, onClose }) {
           role: "assistant",
           content: response.data.answer || response.data.explanation || "I apologize, but I couldn't generate a response.",
           sources: response.data.sources,
+          followUpQuestions: response.data.follow_up_questions,
         };
         setMessages((prev) => [...prev, assistantMessage]);
       } else {
@@ -145,6 +146,24 @@ export function ChatInterface({ predictionData, image, onClose }) {
                           • {source.title}
                         </div>
                       ))}
+                    </div>
+                  )}
+                  {message.followUpQuestions && message.followUpQuestions.length > 0 && (
+                    <div className="message-follow-ups">
+                      <div className="sources-label">You might also ask:</div>
+                      <div className="chat-quick-questions message-follow-up-chips">
+                        {message.followUpQuestions.map((q, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            className="quick-question-chip"
+                            onClick={() => handleQuickQuestion(q)}
+                            disabled={isLoading}
+                          >
+                            {q}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

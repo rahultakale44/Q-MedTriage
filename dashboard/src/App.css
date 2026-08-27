@@ -61,6 +61,112 @@ button:focus-visible {
 }
 
 /* =========================================================
+   HERO HEADER (COMPACT)
+========================================================= */
+
+.hero-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  
+  padding: 1.5rem 6vw;
+  
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(5, 6, 11, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.hero-header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hero-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-header .brand-mark {
+  width: 36px;
+  height: 36px;
+  
+  display: grid;
+  place-items: center;
+  
+  border: 1px solid rgba(0, 230, 255, 0.3);
+  border-radius: 2px;
+  
+  color: #00e6ff;
+  background: rgba(0, 230, 255, 0.05);
+  
+  box-shadow: 0 0 20px rgba(0, 230, 255, 0.1);
+}
+
+.hero-header .brand-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #ffffff;
+}
+
+.hero-header .brand-sub {
+  margin-top: 2px;
+  
+  color: rgba(0, 230, 255, 0.5);
+  
+  font-family: "DM Mono", monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+}
+
+.system-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  padding: 0.5rem 1rem;
+  
+  background: rgba(0, 255, 136, 0.05);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 20px;
+  
+  font-family: "DM Mono", monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: rgba(0, 255, 136, 0.8);
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 10px rgba(0, 255, 136, 0.6);
+  animation: pulse-status 2s ease-in-out infinite;
+}
+
+@keyframes pulse-status {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-weight: 500;
+}
+
+/* =========================================================
    TOPBAR
 ========================================================= */
 
@@ -2160,6 +2266,33 @@ footer {
 ========================================================= */
 
 @media (max-width: 1000px) {
+  .hero-header {
+    padding: 1.25rem 4vw;
+  }
+  
+  .hero-header .brand-mark {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .hero-header .brand-name {
+    font-size: 0.8rem;
+  }
+  
+  .hero-header .brand-sub {
+    font-size: 0.575rem;
+  }
+  
+  .system-status {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.65rem;
+  }
+  
+  .status-dot {
+    width: 5px;
+    height: 5px;
+  }
+  
   .nav-links {
     display: none;
   }
@@ -2295,6 +2428,27 @@ footer {
 ========================================================= */
 
 @media (max-width: 650px) {
+  .hero-header {
+    padding: 1rem 25px;
+  }
+  
+  .hero-header .brand-mark {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .hero-header .brand-name {
+    font-size: 0.75rem;
+  }
+  
+  .hero-header .brand-sub {
+    font-size: 0.5rem;
+  }
+  
+  .system-status {
+    display: none;
+  }
+  
   .topbar {
     height: 76px;
 
@@ -2312,10 +2466,6 @@ footer {
 
   .brand-sub {
     font-size: 7px;
-  }
-
-  .system-status {
-    display: none;
   }
 
   .top-progress {
@@ -2544,6 +2694,28 @@ footer {
 ========================================================= */
 
 @media (max-width: 420px) {
+  .hero-header {
+    padding: 0.875rem 20px;
+  }
+  
+  .hero-header .brand {
+    gap: 0.5rem;
+  }
+  
+  .hero-header .brand-mark {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .hero-header .brand-name {
+    font-size: 0.7rem;
+  }
+  
+  .hero-header .brand-sub {
+    font-size: 0.475rem;
+    margin-top: 1px;
+  }
+  
   .hero {
     padding-left: 20px;
     padding-right: 20px;

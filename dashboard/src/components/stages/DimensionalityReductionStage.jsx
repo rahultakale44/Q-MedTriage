@@ -6,14 +6,27 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 
 export function DimensionalityReductionStage() {
-  // Generate stable random positions for particles
+  // Generate stable, contained positions for particles
+  // Particles stay within a controlled boundary: max ±100px horizontally, ±80px vertically
   const particles = useMemo(() => {
-    return Array.from({ length: 80 }).map(() => ({
-      startX: (Math.random() - 0.5) * 300,
-      startY: (Math.random() - 0.5) * 200,
-      endX: (Math.random() - 0.5) * 30,
-      endY: (Math.random() - 0.5) * 30,
-    }));
+    return Array.from({ length: 80 }).map(() => {
+      // Initial positions within bounded area
+      const baseX = (Math.random() - 0.5) * 160; // -80 to +80
+      const baseY = (Math.random() - 0.5) * 120; // -60 to +60
+      
+      // Subtle floating motion: very small offsets
+      const floatX = (Math.random() - 0.5) * 12; // ±6px
+      const floatY = (Math.random() - 0.5) * 12; // ±6px
+      
+      return {
+        baseX,
+        baseY,
+        floatX,
+        floatY,
+        delay: Math.random() * 2, // stagger animation start
+        duration: 3 + Math.random() * 2, // 3-5s duration
+      };
+    });
   }, []);
 
   return (
@@ -39,28 +52,46 @@ export function DimensionalityReductionStage() {
           <div className="pca-visualization">
             <div className="dimension-cloud high">
               <div className="dimension-label">2048D HIGH-DIMENSIONAL SPACE</div>
-              {particles.map((particle, i) => (
-                <motion.div
-                  key={i}
-                  className="dimension-particle"
-                  initial={{
-                    x: particle.startX,
-                    y: particle.startY,
-                  }}
-                  animate={{
-                    x: particle.endX,
-                    y: particle.endY,
-                    opacity: [1, 0.3],
-                  }}
-                  transition={{
-                    duration: 2,
-                    delay: i * 0.01,
-                  }}
-                />
-              ))}
+              <div className="particle-container">
+                {particles.map((particle, i) => (
+                  <motion.div
+                    key={i}
+                    className="dimension-particle"
+                    initial={{
+                      x: particle.baseX,
+                      y: particle.baseY,
+                      opacity: 0,
+                    }}
+                    animate={{
+                      x: [
+                        particle.baseX,
+                        particle.baseX + particle.floatX,
+                        particle.baseX,
+                      ],
+                      y: [
+                        particle.baseY,
+                        particle.baseY + particle.floatY,
+                        particle.baseY,
+                      ],
+                      opacity: [0, 0.8, 0.8, 0.8],
+                    }}
+                    transition={{
+                      duration: particle.duration,
+                      delay: particle.delay,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                    }}
+                  />
+                ))}
+              </div>
             </div>
 
-            <motion.div className="pca-arrow" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 1, duration: 0.5 }}>
+            <motion.div 
+              className="pca-arrow" 
+              initial={{ scaleX: 0, opacity: 0 }} 
+              animate={{ scaleX: 1, opacity: 1 }} 
+              transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
+            >
               <span>PCA TRANSFORM</span>
             </motion.div>
 
@@ -68,21 +99,23 @@ export function DimensionalityReductionStage() {
               <div className="dimension-label">4D COMPACT SPACE</div>
               <motion.div
                 className="compact-representation"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.5, type: "spring" }}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.2, duration: 0.5, ease: "easeOut" }}
               >
                 {[0, 1, 2, 3].map((i) => (
                   <motion.div
                     key={i}
                     className="compact-dimension"
-                    animate={{
-                      opacity: [0.6, 1, 0.6],
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ 
+                      scale: 1, 
+                      opacity: 1,
                     }}
                     transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      delay: i * 0.2,
+                      delay: 1.4 + i * 0.15,
+                      duration: 0.4,
+                      ease: "easeOut",
                     }}
                   >
                     Q{i}

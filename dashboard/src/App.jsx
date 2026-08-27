@@ -161,6 +161,26 @@ function App() {
 function HeroSection({ onStartTriage }) {
   return (
     <section className="hero">
+      {/* Compact Header */}
+      <header className="hero-header">
+        <div className="hero-header-content">
+          <div className="brand">
+            <div className="brand-mark">
+              <Microscope size={20} />
+            </div>
+            <div>
+              <div className="brand-name">Q-MEDTRIAGE</div>
+              <div className="brand-sub">QUANTUM MEDICAL INTELLIGENCE</div>
+            </div>
+          </div>
+          
+          <div className="system-status">
+            <span className="status-dot"></span>
+            <span className="status-text">SYSTEM READY</span>
+          </div>
+        </div>
+      </header>
+
       <div className="hero-grid" />
 
       <div className="hero-content">

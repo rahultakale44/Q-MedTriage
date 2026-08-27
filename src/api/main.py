@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from PIL import Image
@@ -6,10 +6,23 @@ import io
 import os
 import sys
 from pathlib import Path
+from typing import Optional, Any
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    env_path = PROJECT_ROOT / '.env'
+    if env_path.exists():
+        load_dotenv(env_path)
+        print(f"Loaded environment from {env_path}")
+    else:
+        print(f"Warning: .env file not found at {env_path}")
+except ImportError:
+    print("Warning: python-dotenv not installed, relying on system environment")
 
 from src.inference.predict import ChestXRayInference
 
@@ -47,9 +60,9 @@ print("=" * 70)
 try:
     inference_pipeline = ChestXRayInference()
     PIPELINE_LOADED = True
-    print("✓ Phase 1: Inference pipeline ready")
+    print("OK: Phase 1: Inference pipeline ready")
 except Exception as e:
-    print(f"✗ Failed to load inference pipeline: {e}")
+    print(f"ERROR: Failed to load inference pipeline: {e}")
     PIPELINE_LOADED = False
     inference_pipeline = None
 
@@ -71,22 +84,22 @@ if INTELLIGENCE_IMPORTS_AVAILABLE:
             
             rag_retriever = RAGRetriever()
             rag_retriever.load()
-            print("✓ Phase 2: RAG retriever ready")
-            
+            print("OK: Phase 2: RAG retriever ready")
+             
             # Initialize Gemini synthesizer (requires API key)
             gemini_api_key = os.getenv("GEMINI_API_KEY")
             if gemini_api_key:
                 gemini_synthesizer = GeminiSynthesizer()
                 gemini_synthesizer.initialize()
-                print("✓ Phase 2: Gemini synthesizer ready")
+                print("OK: Phase 2: Gemini synthesizer ready")
                 INTELLIGENCE_ENABLED = True
             else:
-                print("⚠ Phase 2: GEMINI_API_KEY not configured")
+                print("WARNING: Phase 2: GEMINI_API_KEY not configured")
                 print("  Intelligence layer will be unavailable")
                 print("  Set GEMINI_API_KEY in .env to enable")
-                
+                 
         except Exception as e:
-            print(f"⚠ Phase 2: Intelligence layer initialization failed: {e}")
+            print(f"WARNING: Phase 2: Intelligence layer initialization failed: {e}")
             print("  /intelligence endpoint will return errors")
             rag_retriever = None
             gemini_synthesizer = None
@@ -425,9 +438,92 @@ async def intelligence(file: UploadFile = File(...), classifier: str = "classica
 
 
 @app.post("/ask")
-async def ask(question: str):
-    return {
-        "question": question,
-        "answer": "RAG pipeline will be connected here.",
-        "sources": []
-    }
+async def ask(
+    question: str,
+    payload: Optional[dict[str, Any]] = Body(default=None),
+):
+    """
+    Q&A endpoint for medical questions about analysis results
+    
+    Uses current analysis context + RAG retrieval + Gemini synthesis to provide
+    evidence-grounded medical explanations with source citations.
+    
+    Args:
+        question: User's medical question (query parameter)
+        payload: Optional JSON body with analysis_context for the current session
+    
+    Returns:
+        JSON with:
+        - question: The user's question
+        - answer: Generated explanation
+        - sources: List of source documents with URLs
+        - follow_up_questions: Suggested follow-up questions
+        - success: Operation status
+    """
+    analysis_context = None
+    if payload:
+        analysis_context = payload.get("analysis_context")
+
+    # Check if intelligence layer is available
+    if not INTELLIGENCE_ENABLED:
+        return {
+            "question": question,
+            "answer": (
+                "The Q&A service is currently unavailable. "
+                "Please ensure GEMINI_API_KEY is configured."
+            ),
+            "sources": [],
+            "success": False,
+            "error": "Intelligence layer not available"
+        }
+    
+    # Validate question
+    if not question or not question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty"
+        )
+    
+    try:
+        print(f"\n[RAG] Query received: '{question}'")
+        
+        # Step 1: Retrieve relevant medical evidence
+        print(f"[RAG] Retrieving evidence...")
+        retrieved_results = rag_retriever.retrieve(
+            query=question,
+            top_k=5
+        )
+        print(f"[RAG] Retrieved {len(retrieved_results)} documents")
+        
+        # Step 2: Synthesize response using Gemini
+        print(f"[LLM] Generating explanation...")
+        synthesis_result = gemini_synthesizer.synthesize(
+            query=question,
+            retrieved_results=retrieved_results,
+            analysis_context=analysis_context,
+        )
+        print(f"[LLM] Response generated: {synthesis_result['success']}")
+        
+        # Return response
+        return {
+            "question": question,
+            "answer": synthesis_result.get("answer"),
+            "sources": synthesis_result.get("sources", []),
+            "follow_up_questions": synthesis_result.get("follow_up_questions", []),
+            "disclaimer": synthesis_result.get("disclaimer"),
+            "success": synthesis_result.get("success", False),
+            "retrieved_count": len(retrieved_results)
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] Q&A failed: {e}")
+        return {
+            "question": question,
+            "answer": (
+                "I encountered an error while retrieving information. "
+                "Please try again or rephrase your question."
+            ),
+            "sources": [],
+            "success": False,
+            "error": str(e)
+        }

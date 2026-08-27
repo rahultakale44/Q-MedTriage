@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 4rem 6vw;
+  padding: clamp(2rem, 4vh, 4rem) 6vw clamp(2rem, 3vh, 3rem);
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -21,11 +21,11 @@
   display: flex;
   align-items: flex-start;
   gap: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
 }
 
 .stage-number {
-  font-size: 3rem;
+  font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   color: rgba(0, 230, 255, 0.2);
   font-family: monospace;
@@ -47,16 +47,16 @@
 }
 
 .stage-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
   font-weight: 700;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   color: #ffffff;
   line-height: 1.2;
 }
 
 .stage-description {
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.7);
   max-width: 600px;
 }
@@ -65,7 +65,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: clamp(1rem, 2vh, 1.5rem);
 }
 
 .stage-metrics {
@@ -78,8 +78,8 @@
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.2);
   border-radius: 8px;
-  padding: 1rem 1.5rem;
-  min-width: 140px;
+  padding: 0.875rem 1.25rem;
+  min-width: 120px;
 }
 
 .metric-label {
@@ -87,12 +87,12 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-family: monospace;
 }
 
 .metric-value {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: #00e6ff;
 }
@@ -469,7 +469,7 @@
 
 .scanning-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
 }
 
 .scanning-status {
@@ -487,14 +487,14 @@
 }
 
 .scanning-header h2 {
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 700;
   color: #ffffff;
   margin: 0;
 }
 
 .scanning-image-wrapper {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .scanning-image-frame {
@@ -502,8 +502,9 @@
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.2);
   border-radius: 12px;
-  padding: 2rem;
+  padding: clamp(1.25rem, 2.5vh, 2rem);
   overflow: hidden;
+  max-height: clamp(350px, 40vh, 500px);
 }
 
 .scanning-image {
@@ -513,6 +514,8 @@
   border-radius: 8px;
   position: relative;
   z-index: 1;
+  max-height: clamp(300px, 35vh, 450px);
+  object-fit: contain;
 }
 
 .scan-line {
@@ -556,7 +559,7 @@
 
 .scanning-grid {
   position: absolute;
-  inset: 2rem;
+  inset: clamp(1.25rem, 2.5vh, 2rem);
   background-image: 
     linear-gradient(rgba(0, 230, 255, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 230, 255, 0.1) 1px, transparent 1px);
@@ -569,18 +572,18 @@
 .scanning-indicators {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .indicator {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.15);
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -615,7 +618,7 @@
 .preprocessing-visualization {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .preprocessing-flow {
@@ -623,7 +626,7 @@
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  padding: 2rem;
+  padding: 1.5rem;
   background: rgba(0, 230, 255, 0.03);
   border: 1px solid rgba(0, 230, 255, 0.1);
   border-radius: 12px;
@@ -631,7 +634,7 @@
 
 .flow-item {
   flex: 1;
-  max-width: 200px;
+  max-width: 180px;
 }
 
 .flow-image-container {
@@ -699,14 +702,14 @@
 .preprocessing-steps {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.625rem;
 }
 
 .preprocessing-step {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.625rem 1rem;
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.1);
   border-radius: 6px;
@@ -744,8 +747,8 @@
 .feature-visualization {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  padding: 2rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
   background: rgba(0, 230, 255, 0.03);
   border: 1px solid rgba(0, 230, 255, 0.1);
   border-radius: 12px;
@@ -815,7 +818,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 2rem;
-  padding: 3rem 2rem;
+  padding: clamp(1.5rem, 3vh, 2.5rem) 2rem;
   background: rgba(0, 230, 255, 0.03);
   border: 1px solid rgba(0, 230, 255, 0.1);
   border-radius: 12px;
@@ -828,7 +831,7 @@
   align-items: center;
   gap: 1rem;
   position: relative;
-  min-height: 300px;
+  min-height: clamp(200px, 25vh, 280px);
 }
 
 .dimension-label {
@@ -837,15 +840,29 @@
   color: rgba(255, 255, 255, 0.5);
   font-family: monospace;
   letter-spacing: 0.05em;
+  text-align: center;
+}
+
+/* Particle container with strict overflow containment */
+.particle-container {
+  position: relative;
+  width: 200px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Strict containment */
+  border-radius: 8px;
 }
 
 .dimension-particle {
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   background: #00e6ff;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(0, 230, 255, 0.8);
+  box-shadow: 0 0 6px rgba(0, 230, 255, 0.6);
+  pointer-events: none;
 }
 
 .pca-arrow {
@@ -862,6 +879,7 @@
 .pca-arrow::before {
   content: '→';
   font-size: 2rem;
+  color: rgba(0, 230, 255, 0.7);
 }
 
 .compact-representation {
@@ -892,29 +910,29 @@
 .quantum-visualization {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .quantum-circuit {
   background: rgba(0, 230, 255, 0.03);
   border: 1px solid rgba(0, 230, 255, 0.1);
   border-radius: 12px;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .qubit-wire {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   position: relative;
 }
 
 .qubit-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
-  min-width: 3rem;
+  min-width: 2.5rem;
   font-family: monospace;
 }
 
@@ -928,9 +946,9 @@
   background: rgba(0, 230, 255, 0.15);
   border: 2px solid #00e6ff;
   color: #00e6ff;
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.875rem;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   font-family: monospace;
 }
@@ -939,9 +957,9 @@
   background: rgba(138, 43, 226, 0.2);
   border: 1px solid rgba(138, 43, 226, 0.4);
   color: #b794f6;
-  padding: 0.5rem 0.75rem;
+  padding: 0.4rem 0.65rem;
   border-radius: 4px;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   font-family: monospace;
 }
@@ -1005,16 +1023,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
-  padding: 2rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 .evidence-database {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.75rem;
-  padding: 2rem;
+  gap: 0.625rem;
+  padding: 1.5rem;
   background: rgba(0, 230, 255, 0.05);
   border: 2px solid rgba(0, 230, 255, 0.2);
   border-radius: 12px;
@@ -1022,13 +1040,13 @@
 }
 
 .database-label {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   font-family: monospace;
 }
 
 .database-sublabel {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: rgba(0, 230, 255, 0.7);
 }
 
@@ -1042,12 +1060,12 @@
 
 .flow-line {
   width: 2px;
-  height: 40px;
+  height: 35px;
   background: linear-gradient(180deg, #00e6ff, rgba(0, 230, 255, 0.2));
 }
 
 .flow-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   font-family: monospace;
@@ -1056,7 +1074,7 @@
 .evidence-results {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   max-width: 600px;
 }
@@ -1065,7 +1083,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.25rem;
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.2);
   border-radius: 8px;
@@ -1088,7 +1106,7 @@
 }
 
 .evidence-title {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #ffffff;
   margin-bottom: 0.25rem;
@@ -1097,7 +1115,7 @@
 .evidence-meta {
   display: flex;
   gap: 1rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -1123,11 +1141,11 @@
 .reasoning-flow {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .reasoning-source {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   background: rgba(0, 230, 255, 0.05);
   border: 1px solid rgba(0, 230, 255, 0.2);
   border-radius: 8px;
@@ -1135,15 +1153,15 @@
 }
 
 .source-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.5);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
   font-family: monospace;
 }
 
 .source-content {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #ffffff;
 }
@@ -1151,14 +1169,15 @@
 .reasoning-arrow {
   align-self: center;
   color: rgba(0, 230, 255, 0.5);
+  font-size: 1.25rem;
 }
 
 .reasoning-llm {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem;
+  gap: 0.75rem;
+  padding: 1.5rem;
   background: linear-gradient(135deg, rgba(0, 230, 255, 0.1), rgba(138, 43, 226, 0.1));
   border: 2px solid rgba(0, 230, 255, 0.3);
   border-radius: 12px;
@@ -1166,34 +1185,34 @@
 }
 
 .llm-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   font-family: monospace;
 }
 
 .llm-activity {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.7);
 }
 
 .reasoning-output {
-  padding: 1.5rem;
+  padding: 1rem 1.25rem;
   background: rgba(0, 255, 136, 0.05);
   border: 1px solid rgba(0, 255, 136, 0.2);
   border-radius: 8px;
 }
 
 .output-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #00ff88;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   font-family: monospace;
 }
 
 .output-content {
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -1206,7 +1225,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: clamp(1.5rem, 3vh, 2rem);
 }
 
 .result-container {
@@ -1215,7 +1234,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: clamp(1rem, 2.5vh, 1.5rem);
 }
 
 .result-badge {
@@ -1225,16 +1244,16 @@
   background: rgba(0, 255, 136, 0.1);
   border: 1px solid rgba(0, 255, 136, 0.3);
   color: #00ff88;
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
 .result-image {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: clamp(280px, 50vw, 350px);
 }
 
 .result-image img {
@@ -1257,9 +1276,9 @@
 }
 
 .prediction-label {
-  font-size: 3rem;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .prediction-label.normal {
@@ -1278,13 +1297,13 @@
 }
 
 .confidence-value {
-  font-size: 2rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 700;
   color: #00e6ff;
 }
 
 .confidence-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: rgba(255, 255, 255, 0.6);
   font-family: monospace;
 }
@@ -1293,7 +1312,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.875rem;
 }
 
 .probability-item {
@@ -1303,7 +1322,7 @@
 }
 
 .probability-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
   min-width: 100px;
@@ -1312,15 +1331,15 @@
 
 .probability-bar {
   flex: 1;
-  height: 12px;
+  height: 10px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+  border-radius: 5px;
   overflow: hidden;
 }
 
 .probability-fill {
   height: 100%;
-  border-radius: 6px;
+  border-radius: 5px;
 }
 
 .probability-fill.normal {
@@ -1332,41 +1351,42 @@
 }
 
 .probability-value {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #00e6ff;
-  min-width: 60px;
+  min-width: 55px;
   text-align: right;
 }
 
 .result-summary {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.625rem;
   width: 100%;
 }
 
 .summary-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.625rem;
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .summary-item svg {
   color: #00ff88;
+  flex-shrink: 0;
 }
 
 .result-disclaimer {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0.875rem 1rem;
   background: rgba(255, 170, 0, 0.1);
   border: 1px solid rgba(255, 170, 0, 0.3);
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.4;
   text-align: center;
@@ -1638,6 +1658,20 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0.25rem 0;
+}
+
+.message-follow-ups {
+  margin-top: 1rem;
+}
+
+.message-follow-up-chips {
+  padding: 0.5rem 0 0;
+  gap: 0.5rem;
+}
+
+.message-follow-up-chips .quick-question-chip {
+  font-size: 0.8rem;
+  padding: 0.4rem 0.85rem;
 }
 
 .chat-quick-questions {

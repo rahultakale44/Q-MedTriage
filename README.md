@@ -11,22 +11,22 @@
 
 ---
 
-## 🎯 Overview
+##  Overview
 
 Q-MedTriage is an AI-powered medical image triage system that combines classical machine learning, quantum computing, and retrieval-augmented generation (RAG) to classify chest X-rays and provide evidence-grounded medical explanations.
 
 ### Key Features
 
-- **🔬 Dual Classification Pipeline**: Classical SVM and Quantum SVM classifiers
-- **🧠 Transfer Learning**: ResNet50-based feature extraction (2048D → 4D PCA)
-- **⚛️ Quantum ML**: Qiskit-powered quantum kernel methods
-- **📚 RAG Intelligence Layer**: FAISS + SentenceTransformers + LLM synthesis
-- **🎨 Interactive UI**: Real-time pipeline visualization with React + Vite
-- **🔐 Evidence-Grounded**: All medical claims backed by authoritative sources
+- ** Dual Classification Pipeline**: Classical SVM and Quantum SVM classifiers
+- ** Transfer Learning**: ResNet50-based feature extraction (2048D → 4D PCA)
+- ** Quantum ML**: Qiskit-powered quantum kernel methods
+- ** RAG Intelligence Layer**: FAISS + SentenceTransformers + LLM synthesis
+- ** Interactive UI**: Real-time pipeline visualization with React + Vite
+- ** Evidence-Grounded**: All medical claims backed by authoritative sources
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 Chest X-Ray Upload
@@ -60,7 +60,7 @@ Chest X-Ray Upload
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -111,7 +111,7 @@ Frontend will be available at: **http://localhost:5174**
 
 ---
 
-## ⚙️ Configuration
+##  Configuration
 
 Create a `.env` file in the project root (use `.env.example` as template):
 
@@ -140,7 +140,7 @@ FALLBACK_TO_PREDICTION_ONLY=true
 
 ---
 
-## 📊 Performance
+##  Performance
 
 ### Classical SVM
 - **Accuracy**: 89-91%
@@ -160,7 +160,7 @@ FALLBACK_TO_PREDICTION_ONLY=true
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 ```bash
 # Run all tests
@@ -176,7 +176,7 @@ pytest tests/ --cov=src --cov-report=html
 
 ---
 
-## 📖 Documentation
+##  Documentation
 
 Comprehensive technical documentation is available in [`docs/PROJECT_DOCUMENTATION.md`](docs/PROJECT_DOCUMENTATION.md), covering:
 
@@ -191,7 +191,7 @@ Comprehensive technical documentation is available in [`docs/PROJECT_DOCUMENTATI
 
 ---
 
-## 🗂️ Project Structure
+##  Project Structure
 
 ```
 Q-MedTriage/
@@ -229,7 +229,7 @@ Q-MedTriage/
 
 ---
 
-## 🔬 Technology Stack
+##  Technology Stack
 
 ### Backend
 - **Framework**: FastAPI
@@ -246,7 +246,7 @@ Q-MedTriage/
 
 ---
 
-## 📚 Dataset
+##  Dataset
 
 **Kermany Chest X-Ray Dataset**
 
@@ -266,7 +266,7 @@ Mendeley Data, v2. http://dx.doi.org/10.17632/rscbjbr9sj.2
 
 ---
 
-## ⚠️ Medical Disclaimer
+##  Medical Disclaimer
 
 **Q-MedTriage is a research prototype and educational demonstration.**
 
@@ -286,7 +286,7 @@ Mendeley Data, v2. http://dx.doi.org/10.17632/rscbjbr9sj.2
 
 ---
 
-## 🎓 Educational Purpose
+##  Educational Purpose
 
 This project demonstrates:
 - Transfer learning with pretrained CNNs
@@ -309,13 +309,13 @@ This project demonstrates:
 
 ---
 
-## 📄 License
+##  License
 
 [Specify License - e.g., MIT, Apache 2.0]
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 ### Medical Knowledge Sources
 - World Health Organization (WHO)
@@ -333,7 +333,7 @@ This project demonstrates:
 
 ---
 
-## 📧 Contact
+##  Contact
 
 [Add contact information or leave blank for hackathon submission]
 

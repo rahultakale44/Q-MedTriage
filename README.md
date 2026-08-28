@@ -10,6 +10,9 @@
 > **⚠️ IMPORTANT:** This is a research prototype and educational demonstration. Not intended for medical diagnosis or clinical use.
 
 ---
+<p align="center">
+  <img src="1787845294977.jpg" alt="Q-MedTriage System Overview" width="100%">
+</p>
 
 ##  Overview
 

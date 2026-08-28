@@ -20,12 +20,12 @@ Q-MedTriage is an AI-powered medical image triage system that combines classical
 
 ### Key Features
 
--  Dual Classification Pipeline**: Classical SVM and Quantum SVM classifiers
--  Transfer Learning**: ResNet50-based feature extraction (2048D → 4D PCA)
--  Quantum ML**: Qiskit-powered quantum kernel methods
--  RAG Intelligence Layer**: FAISS + SentenceTransformers + LLM synthesis
--  Interactive UI**: Real-time pipeline visualization with React + Vite
--  Evidence-Grounded**: All medical claims backed by authoritative sources
+-  Dual Classification Pipeline: Classical SVM and Quantum SVM classifiers
+-  Transfer Learning: ResNet50-based feature extraction (2048D → 4D PCA)
+-  Quantum ML: Qiskit-powered quantum kernel methods
+-  RAG Intelligence Layer: FAISS + SentenceTransformers + LLM synthesis
+-  Interactive UI: Real-time pipeline visualization with React + Vite
+-  Evidence-Grounded: All medical claims backed by authoritative sources
 
 ---
 

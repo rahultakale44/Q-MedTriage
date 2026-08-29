@@ -4,6 +4,7 @@
 
 export { UploadStage } from "./UploadStage";
 export { PreviewStage } from "./PreviewStage";
+export { ValidatingStage } from "./ValidatingStage";
 export { ScanningStage } from "./ScanningStage";
 export { PreprocessingStage } from "./PreprocessingStage";
 export { FeatureExtractionStage } from "./FeatureExtractionStage";

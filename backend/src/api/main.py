@@ -15,16 +15,23 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # Load environment variables from .env file
 try:
     from dotenv import load_dotenv
-    env_path = PROJECT_ROOT / '.env'
-    if env_path.exists():
-        load_dotenv(env_path)
-        print(f"Loaded environment from {env_path}")
+    # Try backend/.env first, then fallback to project root .env
+    backend_env_path = PROJECT_ROOT / '.env'
+    root_env_path = PROJECT_ROOT.parent / '.env'
+    
+    if backend_env_path.exists():
+        load_dotenv(backend_env_path)
+        print(f"Loaded environment from {backend_env_path}")
+    elif root_env_path.exists():
+        load_dotenv(root_env_path)
+        print(f"Loaded environment from {root_env_path}")
     else:
-        print(f"Warning: .env file not found at {env_path}")
+        print(f"Warning: .env file not found at {backend_env_path} or {root_env_path}")
 except ImportError:
     print("Warning: python-dotenv not installed, relying on system environment")
 
 from src.inference.predict import ChestXRayInference
+from src.inference.chest_xray_validator import ChestXRayValidator
 
 # Intelligence Layer (Phase 2) imports
 try:
@@ -55,6 +62,21 @@ app.add_middleware(
 print("=" * 70)
 print("Initializing Q-MedTriage API")
 print("=" * 70)
+
+# Phase 0: Chest X-ray Validator (CRITICAL SAFETY GATE)
+chest_xray_validator = None
+VALIDATOR_LOADED = False
+
+try:
+    chest_xray_validator = ChestXRayValidator()
+    chest_xray_validator.load()
+    VALIDATOR_LOADED = True
+    print("OK: Phase 0: Chest X-ray validator ready (SAFETY GATE ACTIVE)")
+except Exception as e:
+    print(f"ERROR: Failed to load chest X-ray validator: {e}")
+    print("WARNING: System will accept ANY image - UNSAFE!")
+    VALIDATOR_LOADED = False
+    chest_xray_validator = None
 
 # Phase 1: Image Classification
 try:
@@ -131,14 +153,120 @@ def health():
     
     return {
         "api": "online",
+        "chest_xray_validator": "ready" if VALIDATOR_LOADED else "failed",
         "vision_model": "ready" if PIPELINE_LOADED else "failed",
         "classical_svm": "ready" if PIPELINE_LOADED else "failed",
         "quantum_svm": "ready" if quantum_available else "unavailable",
         "rag_retriever": "ready" if (rag_retriever and rag_retriever.is_ready) else "unavailable",
         "grok_synthesizer": "ready" if (grok_synthesizer and grok_synthesizer.is_ready) else "unavailable",
         "intelligence_enabled": INTELLIGENCE_ENABLED,
-        "pipeline_loaded": PIPELINE_LOADED
+        "pipeline_loaded": PIPELINE_LOADED,
+        "validator_loaded": VALIDATOR_LOADED
     }
+
+
+@app.post("/validate-image")
+async def validate_image(file: UploadFile = File(...)):
+    """
+    Validate that an uploaded image is a chest radiograph.
+    
+    This endpoint ONLY performs validation, no inference.
+    Use this before calling /predict to implement two-phase user flow:
+    1. Upload → Validate → Show "Chest Radiograph Detected" OR "Unsupported Image"
+    2. User clicks "Begin Analysis" → Call /predict
+    
+    Args:
+        file: Uploaded image file
+    
+    Returns:
+        HTTP 200 with validation result:
+        {
+            "valid": true/false,
+            "detected_type": "chest_xray" | "unsupported",
+            "confidence": float,
+            "message": str,
+            "scores": {...}
+        }
+    """
+    print("\n" + "=" * 70)
+    print("[VALIDATE-IMAGE] Request received")
+    print("=" * 70)
+    
+    # Validate file type
+    if not file.content_type.startswith("image/"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid file type: {file.content_type}. Must be an image."
+        )
+    
+    try:
+        # Read and load image
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents))
+        print(f"[VALIDATE-IMAGE] Image loaded: {image.size} {image.mode}")
+        
+        # Check if validator is loaded
+        if not VALIDATOR_LOADED:
+            print("[VALIDATE-IMAGE] ✗ ERROR: Validator not loaded")
+            print("=" * 70)
+            raise HTTPException(
+                status_code=503,
+                detail="Chest X-ray validator not available. Cannot perform validation."
+            )
+        
+        # Run validation
+        print("[VALIDATE-IMAGE] Running chest X-ray validation...")
+        validation_result = chest_xray_validator.validate(image)
+        
+        # Build response
+        if validation_result["is_valid_chest_xray"]:
+            # VALID CHEST RADIOGRAPH
+            print(f"[VALIDATE-IMAGE] ✓ ACCEPTED - Chest X-ray confidence = {validation_result['confidence']:.2%}")
+            print(f"[VALIDATE-IMAGE] Margin: {validation_result['scores']['margin']:.2%}")
+            print("=" * 70)
+            
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "valid": True,
+                    "detected_type": "chest_xray",
+                    "confidence": validation_result["confidence"],
+                    "message": "Chest radiograph detected successfully.",
+                    "scores": validation_result["scores"],
+                    "threshold": validation_result["threshold"],
+                    "margin_threshold": validation_result["margin_threshold"]
+                }
+            )
+        else:
+            # INVALID / NON-CHEST IMAGE
+            print(f"[VALIDATE-IMAGE] ✗ REJECTED - {validation_result['detected_type']}")
+            print(f"[VALIDATE-IMAGE] Confidence: {validation_result['confidence']:.2%}")
+            print(f"[VALIDATE-IMAGE] Reason: {validation_result['reason']}")
+            print("=" * 70)
+            
+            return JSONResponse(
+                status_code=200,  # Still 200, but valid=false in body
+                content={
+                    "valid": False,
+                    "detected_type": validation_result["detected_type"],
+                    "confidence": validation_result["confidence"],
+                    "message": "This system is designed exclusively for chest radiograph analysis. Please upload a valid chest X-ray image.",
+                    "reason": validation_result["reason"],
+                    "scores": validation_result["scores"],
+                    "threshold": validation_result["threshold"],
+                    "margin_threshold": validation_result["margin_threshold"]
+                }
+            )
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[VALIDATE-IMAGE] ✗ ERROR: {str(e)}")
+        print("=" * 70)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error validating image: {str(e)}"
+        )
 
 
 @app.post("/predict")
@@ -146,25 +274,37 @@ async def predict(file: UploadFile = File(...), classifier: str = "classical"):
     """
     Predict pneumonia from chest X-ray image
     
+    CRITICAL: This endpoint includes STRICT input validation.
+    Only valid chest radiographs are accepted.
+    Validation runs BEFORE checking if inference pipeline is available.
+    
+    RECOMMENDED FLOW:
+    1. Call /validate-image first to check if image is a chest radiograph
+    2. Show validation result to user
+    3. Only if valid, allow user to click "Begin Analysis"
+    4. Then call this /predict endpoint
+    
     Args:
         file: Uploaded chest X-ray image
         classifier: "classical" (default) or "quantum"
     
     Returns:
         JSON with prediction, confidence, probabilities, and disclaimer
+        OR validation error if image is not a chest radiograph
     """
+    print("\n" + "=" * 70)
+    print("[PREDICT] Request received")
+    print("=" * 70)
+    print(f"[PREDICT] File: {file.filename}")
+    print(f"[PREDICT] Content-Type: {file.content_type}")
+    print(f"[PREDICT] Size: {file.size if hasattr(file, 'size') else 'unknown'}")
+    print("=" * 70)
+    
     # Validate classifier parameter
     if classifier not in ["classical", "quantum"]:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid classifier: {classifier}. Must be 'classical' or 'quantum'"
-        )
-    
-    # Check if pipeline is loaded
-    if not PIPELINE_LOADED:
-        raise HTTPException(
-            status_code=503,
-            detail="Inference pipeline not available"
         )
     
     # Validate file type
@@ -178,8 +318,65 @@ async def predict(file: UploadFile = File(...), classifier: str = "classical"):
         # Read image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
+        print(f"[PREDICT] Image loaded: {image.size} {image.mode}")
         
+        # ============================================================================
+        # CRITICAL SAFETY GATE: Validate that this is a chest radiograph
+        # THIS MUST RUN FIRST - BEFORE ANY PIPELINE CHECKS
+        # ============================================================================
+        print("[VALIDATION] Running chest X-ray validation...")
+        
+        if VALIDATOR_LOADED:
+            validation_result = chest_xray_validator.validate(image)
+            
+            if not validation_result["is_valid_chest_xray"]:
+                # REJECT: Not a chest radiograph
+                print(f"[VALIDATION] ✗ REJECTED - {validation_result['detected_type']}")
+                print(f"[VALIDATION] Confidence: {validation_result['confidence']:.2%}")
+                print(f"[VALIDATION] Reason: {validation_result['reason']}")
+                print("[VALIDATION] Image will NOT proceed to inference pipeline")
+                print("=" * 70)
+                
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "valid": False,
+                        "error": "unsupported_image",
+                        "message": "This system is designed exclusively for chest radiograph analysis. Please upload a valid chest X-ray image.",
+                        "validation": {
+                            "is_valid_chest_xray": False,
+                            "confidence": validation_result["confidence"],
+                            "detected_type": validation_result["detected_type"],
+                            "reason": validation_result["reason"],
+                            "scores": validation_result["scores"]
+                        }
+                    }
+                )
+            
+            # ACCEPT: Valid chest radiograph
+            print(f"[VALIDATION] ✓ ACCEPTED - Chest X-ray confidence = {validation_result['confidence']:.2%}")
+            print(f"[VALIDATION] Margin: {validation_result['scores']['margin']:.2%}")
+            print("[VALIDATION] Image will proceed to inference pipeline")
+        else:
+            # WARNING: Validator not loaded - proceeding WITHOUT validation
+            print("[VALIDATION] ✗ WARNING: Validator not loaded - proceeding without validation (UNSAFE)")
+            validation_result = None
+        
+        # ============================================================================
+        # ONLY AFTER VALIDATION PASSES: Check if pipeline is available
+        # ============================================================================
+        if not PIPELINE_LOADED:
+            print("[INFERENCE] ✗ Inference pipeline not available")
+            print("=" * 70)
+            raise HTTPException(
+                status_code=503,
+                detail="Inference pipeline not available. The image passed validation, but the classification models are not loaded."
+            )
+        
+        # ============================================================================
         # Run inference with selected classifier
+        # ============================================================================
+        print(f"[INFERENCE] Running {classifier} classifier...")
         result = inference_pipeline.predict(image, classifier=classifier, include_features=False)
         
         if not result["success"]:
@@ -194,9 +391,16 @@ async def predict(file: UploadFile = File(...), classifier: str = "classical"):
                 detail=f"Prediction failed: {result.get('error', 'Unknown error')}"
             )
         
-        # Add filename and classifier to response
+        # Add filename, classifier, and validation info to response
         result["filename"] = file.filename
         result["classifier"] = classifier
+        
+        if validation_result:
+            result["validation"] = {
+                "is_valid_chest_xray": True,
+                "confidence": validation_result["confidence"],
+                "detected_type": "chest_xray"
+            }
         
         return JSONResponse(content=result)
         
@@ -215,9 +419,10 @@ async def intelligence(file: UploadFile = File(...), classifier: str = "classica
     Comprehensive intelligence endpoint: Image classification + Evidence retrieval + Explanation synthesis
     
     This endpoint integrates:
+    - Phase 0: Chest X-ray validation (RUNS FIRST)
     - Phase 1: Image classification (ResNet50 → PCA → Classical/Quantum SVM)
     - Phase 2: RAG evidence retrieval (FAISS similarity search)
-    - Phase 2: Gemini evidence-grounded synthesis
+    - Phase 2: LLM evidence-grounded synthesis
     
     Args:
         file: Uploaded chest X-ray image
@@ -231,30 +436,21 @@ async def intelligence(file: UploadFile = File(...), classifier: str = "classica
         - success: Overall operation status
     
     SAFETY GUARANTEES:
+    - Validation runs FIRST before any processing
     - Classifier prediction is authoritative (never overridden)
-    - Gemini synthesis is evidence-only (no diagnosis/treatment)
+    - LLM synthesis is evidence-only (no diagnosis/treatment)
     - All sources are from authoritative medical organizations
     - Medical disclaimer is mandatory
     """
-    # Check if intelligence layer is available
-    if not INTELLIGENCE_ENABLED:
-        raise HTTPException(
-            status_code=503,
-            detail="Intelligence layer not available. Check XAI_API_KEY configuration."
-        )
+    print("\n" + "=" * 70)
+    print("[INTELLIGENCE] Request received")
+    print("=" * 70)
     
     # Validate classifier parameter
     if classifier not in ["classical", "quantum"]:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid classifier: {classifier}. Must be 'classical' or 'quantum'"
-        )
-    
-    # Check if pipeline is loaded
-    if not PIPELINE_LOADED:
-        raise HTTPException(
-            status_code=503,
-            detail="Inference pipeline not available"
         )
     
     # Validate file type
@@ -266,12 +462,76 @@ async def intelligence(file: UploadFile = File(...), classifier: str = "classica
     
     try:
         # ====================================================================
-        # STEP 1: RUN PHASE 1 CLASSIFIER
+        # STEP 0: CRITICAL SAFETY GATE - Validate chest radiograph FIRST
         # ====================================================================
         
         # Read image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents))
+        print(f"[INTELLIGENCE] Image loaded: {image.size} {image.mode}")
+        
+        # Validate that this is a chest radiograph
+        print("[VALIDATION] Running chest X-ray validation...")
+        
+        if VALIDATOR_LOADED:
+            validation_result = chest_xray_validator.validate(image)
+            
+            if not validation_result["is_valid_chest_xray"]:
+                # REJECT: Not a chest radiograph
+                print(f"[VALIDATION] ✗ REJECTED - {validation_result['detected_type']}")
+                print(f"[VALIDATION] Confidence: {validation_result['confidence']:.2%}")
+                print(f"[VALIDATION] Reason: {validation_result['reason']}")
+                print("[VALIDATION] Image will NOT proceed to intelligence pipeline")
+                print("=" * 70)
+                
+                return JSONResponse(
+                    status_code=400,
+                    content={
+                        "valid": False,
+                        "error": "unsupported_image",
+                        "message": "This system is designed exclusively for chest radiograph analysis. Please upload a valid chest X-ray image.",
+                        "validation": {
+                            "is_valid_chest_xray": False,
+                            "confidence": validation_result["confidence"],
+                            "detected_type": validation_result["detected_type"],
+                            "reason": validation_result["reason"],
+                            "scores": validation_result["scores"]
+                        }
+                    }
+                )
+            
+            # ACCEPT: Valid chest radiograph
+            print(f"[VALIDATION] ✓ ACCEPTED - Chest X-ray confidence = {validation_result['confidence']:.2%}")
+            print(f"[VALIDATION] Margin: {validation_result['scores']['margin']:.2%}")
+            print("[VALIDATION] Image will proceed to intelligence pipeline")
+        else:
+            # WARNING: Validator not loaded
+            print("[VALIDATION] ✗ WARNING: Validator not loaded - proceeding without validation (UNSAFE)")
+            validation_result = None
+        
+        # ====================================================================
+        # ONLY AFTER VALIDATION PASSES: Check system availability
+        # ====================================================================
+        
+        # Check if intelligence layer is available
+        if not INTELLIGENCE_ENABLED:
+            raise HTTPException(
+                status_code=503,
+                detail="Intelligence layer not available. Check XAI_API_KEY configuration."
+            )
+        
+        # Check if pipeline is loaded
+        if not PIPELINE_LOADED:
+            print("[INFERENCE] ✗ Inference pipeline not available")
+            print("=" * 70)
+            raise HTTPException(
+                status_code=503,
+                detail="Inference pipeline not available. The image passed validation, but the classification models are not loaded."
+            )
+        
+        # ====================================================================
+        # STEP 1: RUN PHASE 1 CLASSIFIER
+        # ====================================================================
         
         # Run inference with selected classifier
         classifier_result = inference_pipeline.predict(image, classifier=classifier, include_features=False)

@@ -17,6 +17,7 @@ import {
   PipelineProgress,
   UploadStage,
   PreviewStage,
+  ValidatingStage,
   ScanningStage,
   PreprocessingStage,
   FeatureExtractionStage,
@@ -36,6 +37,7 @@ function App() {
     uploadedImage,
     predictionResult,
     predictionError,
+    validationError,
     startTriage,
     handleImageUpload,
     startAnalysis,
@@ -46,6 +48,7 @@ function App() {
   const showProgress = currentStage !== STAGES.LANDING && 
                        currentStage !== STAGES.UPLOAD && 
                        currentStage !== STAGES.PREVIEW &&
+                       currentStage !== STAGES.VALIDATING &&
                        currentStage !== STAGES.CHAT;
 
   return (
@@ -83,6 +86,11 @@ function App() {
             onStartAnalysis={startAnalysis}
             onReset={resetPipeline}
           />
+        )}
+
+        {/* VALIDATING */}
+        {currentStage === STAGES.VALIDATING && (
+          <ValidatingStage key="validating" />
         )}
 
         {/* SCANNING */}
@@ -127,6 +135,7 @@ function App() {
             image={uploadedImage}
             predictionData={predictionResult}
             error={predictionError}
+            validationError={validationError}
             onOpenChat={openChat}
             onReset={resetPipeline}
           />

@@ -50,7 +50,7 @@ export async function checkHealth() {
  * Analyze medical image
  * 
  * @param {File} imageFile - The uploaded chest X-ray image
- * @returns {Promise} Analysis result containing all pipeline stages
+ * @returns {Promise} Analysis result containing all pipeline stages or validation error
  */
 export async function analyzeImage(imageFile) {
   if (USE_DEMO_DATA) {
@@ -72,11 +72,21 @@ export async function analyzeImage(imageFile) {
       body: formData,
     });
 
+    const data = await response.json();
+
+    // Handle validation errors (400 status with unsupported_image error)
+    if (response.status === 400 && data.error === "unsupported_image") {
+      return {
+        success: false,
+        validationError: true,
+        error: data.message || "This system is designed exclusively for chest radiograph analysis.",
+        validation: data.validation,
+      };
+    }
+
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
     }
-
-    const data = await response.json();
 
     return {
       success: true,
@@ -85,6 +95,7 @@ export async function analyzeImage(imageFile) {
   } catch (error) {
     return {
       success: false,
+      validationError: false,
       error: error.message,
     };
   }

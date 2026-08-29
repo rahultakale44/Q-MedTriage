@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend API Flow</title>
+</head>
+<body>
+    <h1>Test Frontend API Flow</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <button onclick="testAPI()">Test Predict</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        
+        async function testAPI() {
+            const fileInput = document.getElementById('fileInput');
+            const output = document.getElementById('output');
+            
+            if (!fileInput.files[0]) {
+                output.textContent = "Please select a file first";
+                return;
+            }
+            
+            const imageFile = fileInput.files[0];
+            output.textContent = `Testing with: ${imageFile.name}\n`;
+            
+            try {
+                const formData = new FormData();
+                formData.append("file", imageFile);
+                
+                output.textContent += `\nSending POST to ${API_URL}/predict...\n`;
+                
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: "POST",
+                    body: formData,
+                });
+                
+                output.textContent += `\nResponse Status: ${response.status} ${response.statusText}\n`;
+                output.textContent += `Response OK: ${response.ok}\n`;
+                
+                const data = await response.json();
+                output.textContent += `\nResponse Body:\n${JSON.stringify(data, null, 2)}\n`;
+                
+                // Check validation
+                if (response.status === 400 && data.error === "unsupported_image") {
+                    output.textContent += `\n=== VALIDATION REJECTED ===\n`;
+                    output.textContent += `validationError should be: true\n`;
+                } else if (response.ok && data.success) {
+                    output.textContent += `\n=== SUCCESS ===\n`;
+                    output.textContent += `validationError should be: false\n`;
+                    output.textContent += `Validation: ${JSON.stringify(data.validation)}\n`;
+                } else {
+                    output.textContent += `\n=== SYSTEM ERROR ===\n`;
+                    output.textContent += `validationError should be: false\n`;
+                }
+                
+            } catch (error) {
+                output.textContent += `\n=== FETCH ERROR ===\n`;
+                output.textContent += `Error: ${error.message}\n`;
+                output.textContent += `This is a network/CORS error, NOT a validation error\n`;
+                output.textContent += `validationError should be: false\n`;
+            }
+        }
+    </script>
+</body>
+</html>

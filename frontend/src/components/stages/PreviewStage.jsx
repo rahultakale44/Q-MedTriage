@@ -20,7 +20,8 @@ export function PreviewStage({ image, onStartAnalysis, onReset }) {
             <CheckCircle2 size={20} />
             <span>IMAGE READY</span>
           </div>
-          <h2>Chest Radiograph Detected</h2>
+          <h2>Image Uploaded Successfully</h2>
+          <p className="preview-subtitle">Chest X-ray validation will occur during analysis</p>
         </div>
 
         <div className="preview-image-wrapper">
@@ -30,7 +31,7 @@ export function PreviewStage({ image, onStartAnalysis, onReset }) {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <img src={image} alt="Uploaded chest X-ray" className="preview-image" />
+            <img src={image} alt="Uploaded medical image" className="preview-image" />
             <div className="image-overlay">
               <div className="corner-marker top-left" />
               <div className="corner-marker top-right" />

@@ -21,11 +21,21 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from qiskit.circuit.library import zz_feature_map
-from qiskit.primitives import StatevectorSampler
-from qiskit_machine_learning.algorithms import QSVC
-from qiskit_machine_learning.kernels import FidelityQuantumKernel
-from qiskit_machine_learning.state_fidelities import ComputeUncompute
+try:
+    from qiskit.circuit.library import zz_feature_map
+    from qiskit.primitives import StatevectorSampler
+    from qiskit_machine_learning.algorithms import QSVC
+    from qiskit_machine_learning.kernels import FidelityQuantumKernel
+    from qiskit_machine_learning.state_fidelities import ComputeUncompute
+    QISKIT_AVAILABLE = True
+except (ImportError, TypeError) as e:
+    print(f"Warning: Qiskit imports failed: {e}")
+    QISKIT_AVAILABLE = False
+    zz_feature_map = None
+    StatevectorSampler = None
+    QSVC = None
+    FidelityQuantumKernel = None
+    ComputeUncompute = None
 
 
 CLASS_LABELS = {

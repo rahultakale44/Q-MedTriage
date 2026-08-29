@@ -6,7 +6,41 @@
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertCircle, MessageSquare, RotateCcw, Image as ImageIcon } from "lucide-react";
 
-export function ResultStage({ image, predictionData, error, onOpenChat, onReset }) {
+export function ResultStage({ image, predictionData, error, validationError, onOpenChat, onReset }) {
+  // Handle validation errors (unsupported image)
+  if (validationError) {
+    return (
+      <motion.div
+        className="result-stage error validation-error"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring" }}
+      >
+        <div className="result-container">
+          <div className="result-icon error-icon">
+            <ImageIcon size={64} strokeWidth={1.5} />
+          </div>
+          <h2 className="result-title">Invalid Image</h2>
+          <p className="result-message validation-message">
+            This system is designed exclusively for chest radiograph analysis.
+          </p>
+          <p className="result-submessage">
+            Please upload a valid chest X-ray image.
+          </p>
+          <div className="validation-details">
+            <AlertCircle size={16} />
+            <span>Images such as skull X-rays, hand X-rays, CT scans, MRI scans, photographs, or other non-chest radiographs are not supported.</span>
+          </div>
+          <button className="primary-action-button" onClick={onReset}>
+            <RotateCcw size={20} />
+            Try Again
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Handle other errors
   if (error) {
     return (
       <motion.div

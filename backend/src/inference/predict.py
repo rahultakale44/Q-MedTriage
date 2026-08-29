@@ -41,9 +41,9 @@ class ChestXRayInference:
     
     def __init__(
         self,
-        pca_model_path: str = "models/pca_reducer.pkl",
-        svm_model_path: str = "models/classical_svm.pkl",
-        quantum_svm_path: str = "models/quantum_svm.pkl",
+        pca_model_path: str = None,
+        svm_model_path: str = None,
+        quantum_svm_path: str = None,
         device: str = "auto"
     ):
         """
@@ -55,6 +55,16 @@ class ChestXRayInference:
             quantum_svm_path: Path to trained Quantum SVM model
             device: Device for ResNet50 ('cpu', 'cuda', or 'auto')
         """
+        # Resolve paths relative to project root
+        project_root = Path(__file__).resolve().parents[3]  # backend/src/inference/predict.py -> project root
+        
+        if pca_model_path is None:
+            pca_model_path = project_root / "models" / "pca_reducer.pkl"
+        if svm_model_path is None:
+            svm_model_path = project_root / "models" / "classical_svm.pkl"
+        if quantum_svm_path is None:
+            quantum_svm_path = project_root / "models" / "quantum_svm.pkl"
+        
         self.device = self._get_device(device)
         
         print("=" * 70)
@@ -81,8 +91,8 @@ class ChestXRayInference:
         # Class labels
         self.class_names = ["NORMAL", "PNEUMONIA"]
         
-        print("\n✓ Inference pipeline ready")
-        print(f"✓ Device: {self.device}")
+        print("\n[OK] Inference pipeline ready")
+        print(f"[OK] Device: {self.device}")
         print("=" * 70)
     
     def _get_device(self, device: str) -> torch.device:
@@ -98,7 +108,7 @@ class ChestXRayInference:
             raise FileNotFoundError(f"PCA model not found: {pca_path}")
         
         pca_model = joblib.load(pca_path)
-        print(f"✓ PCA model loaded: {pca_path}")
+        print(f"[OK] PCA model loaded: {pca_path}")
         print(f"  Components: {pca_model.n_components_}")
         return pca_model
     
@@ -109,7 +119,7 @@ class ChestXRayInference:
             raise FileNotFoundError(f"SVM model not found: {svm_path}")
         
         svm_model = joblib.load(svm_path)
-        print(f"✓ SVM model loaded: {svm_path}")
+        print(f"[OK] SVM model loaded: {svm_path}")
         return svm_model
     
     def _load_quantum_svm(self, path: str):
@@ -150,7 +160,7 @@ class ChestXRayInference:
         model = model.to(self.device)
         model.eval()
         
-        print(f"✓ ResNet50 feature extractor loaded")
+        print(f"[OK] ResNet50 feature extractor loaded")
         print(f"  Output dimension: 2048")
         
         return model
@@ -440,14 +450,14 @@ if __name__ == "__main__":
         result = pipeline.predict(test_normal, include_features=True)
         
         if result["success"]:
-            print(f"✓ Prediction: {result['prediction_label']}")
-            print(f"✓ Confidence: {result['confidence']:.2%}")
-            print(f"✓ Inference time: {result['inference_time_ms']}ms")
-            print(f"✓ Probabilities:")
+            print(f"[OK] Prediction: {result['prediction_label']}")
+            print(f"[OK] Confidence: {result['confidence']:.2%}")
+            print(f"[OK] Inference time: {result['inference_time_ms']}ms")
+            print(f"[OK] Probabilities:")
             for label, prob in result['probabilities'].items():
                 print(f"    {label}: {prob:.2%}")
         else:
-            print(f"✗ Error: {result['error']}")
+            print(f"[X] Error: {result['error']}")
     
     if test_pneumonia.exists():
         print("\n" + "-" * 70)
@@ -456,14 +466,14 @@ if __name__ == "__main__":
         result = pipeline.predict(test_pneumonia, include_features=True)
         
         if result["success"]:
-            print(f"✓ Prediction: {result['prediction_label']}")
-            print(f"✓ Confidence: {result['confidence']:.2%}")
-            print(f"✓ Inference time: {result['inference_time_ms']}ms")
-            print(f"✓ Probabilities:")
+            print(f"[OK] Prediction: {result['prediction_label']}")
+            print(f"[OK] Confidence: {result['confidence']:.2%}")
+            print(f"[OK] Inference time: {result['inference_time_ms']}ms")
+            print(f"[OK] Probabilities:")
             for label, prob in result['probabilities'].items():
                 print(f"    {label}: {prob:.2%}")
         else:
-            print(f"✗ Error: {result['error']}")
+            print(f"[X] Error: {result['error']}")
     
     print("\n" + "=" * 70)
     print("Inference pipeline test complete")

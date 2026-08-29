@@ -22,6 +22,8 @@ export function usePrediction() {
    */
   const predict = useCallback(async (imageFile) => {
     console.log("[usePrediction] Starting prediction...");
+    console.log("[usePrediction] API_URL:", API_URL);
+    console.log("[usePrediction] Image file:", imageFile.name, imageFile.type, imageFile.size);
     
     // Reset state
     setPredictionState({
@@ -29,6 +31,8 @@ export function usePrediction() {
       isComplete: false,
       result: null,
       error: null,
+      validationError: false,
+      validation: null,
     });
 
     try {
@@ -44,21 +48,80 @@ export function usePrediction() {
         body: formData,
       });
 
-      console.log("[usePrediction] Response status:", response.status, response.statusText);
+      console.log("[usePrediction] Response received:");
+      console.log("  - Status:", response.status);
+      console.log("  - Status Text:", response.statusText);
+      console.log("  - OK:", response.ok);
+      console.log("  - Headers:", Object.fromEntries(response.headers.entries()));
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.detail || `API error: ${response.status} ${response.statusText}`
-        );
+      // Handle response
+      const data = await response.json();
+      console.log("[usePrediction] Response body parsed:");
+      console.log("  - data:", data);
+      console.log("  - data.success:", data.success);
+      console.log("  - data.error:", data.error);
+      console.log("  - data.validation:", data.validation);
+
+      // Check for validation error (unsupported image)
+      if (response.status === 400 && data.error === "unsupported_image") {
+        const validationError = data.message || "This system is designed exclusively for chest radiograph analysis.";
+        console.error("[usePrediction] VALIDATION REJECTED - Setting validationError: true");
+        
+        const errorState = {
+          isLoading: false,
+          isComplete: false,
+          result: null,
+          error: validationError,
+          validationError: true,
+          validation: data.validation,
+        };
+        
+        setPredictionState(errorState);
+        
+        // Create custom error to identify validation failure
+        const err = new Error(validationError);
+        err.isValidationError = true;
+        throw err;
       }
 
-      const data = await response.json();
-      console.log("[usePrediction] Raw API response:", data);
+      if (!response.ok) {
+        console.error("[usePrediction] Non-OK response - Setting validationError: false (system error)");
+        const errorMessage = data.detail || `API error: ${response.status} ${response.statusText}`;
+        
+        const errorState = {
+          isLoading: false,
+          isComplete: false,
+          result: null,
+          error: errorMessage,
+          validationError: false,
+          validation: null,
+        };
+        
+        setPredictionState(errorState);
+        
+        const err = new Error(errorMessage);
+        err.isSystemError = true;
+        throw err;
+      }
 
       // Validate response
       if (!data.success) {
-        throw new Error(data.error || "Prediction failed");
+        console.error("[usePrediction] data.success === false - System error");
+        
+        const errorState = {
+          isLoading: false,
+          isComplete: false,
+          result: null,
+          error: data.error || "Prediction failed",
+          validationError: false,
+          validation: null,
+        };
+        
+        setPredictionState(errorState);
+        
+        const err = new Error(data.error || "Prediction failed");
+        err.isSystemError = true;
+        throw err;
       }
 
       // Transform API response to match app structure
@@ -201,11 +264,16 @@ export function usePrediction() {
         raw: data,
       };
 
+      console.log("[usePrediction] SUCCESS - Validation passed, prediction complete");
+      console.log("[usePrediction] Setting state: isComplete=true, validationError=false");
+
       setPredictionState({
         isLoading: false,
         isComplete: true,
         result: transformedResult,
         error: null,
+        validationError: false,
+        validation: null,
       });
 
       console.log("[usePrediction] Transformed result stored in state:", transformedResult);
@@ -213,14 +281,27 @@ export function usePrediction() {
 
       return transformedResult;
     } catch (error) {
-      console.error("[usePrediction] Prediction error:", error);
+      console.error("[usePrediction] CATCH BLOCK - Prediction error:", error);
+      console.error("  - Error name:", error.name);
+      console.error("  - Error message:", error.message);
+      console.error("  - isValidationError:", error.isValidationError);
+      console.error("  - isSystemError:", error.isSystemError);
 
-      setPredictionState({
-        isLoading: false,
-        isComplete: false,
-        result: null,
-        error: error.message || "Failed to analyze image",
-      });
+      // Only handle network/fetch errors here
+      // Validation and system errors already set state before throwing
+      if (!error.isValidationError && !error.isSystemError) {
+        console.error("[usePrediction] Network/fetch error - Setting validationError: false");
+        setPredictionState({
+          isLoading: false,
+          isComplete: false,
+          result: null,
+          error: error.message || "Failed to connect to analysis service",
+          validationError: false,
+          validation: null,
+        });
+      } else {
+        console.error("[usePrediction] Error state already set, not overwriting");
+      }
 
       throw error;
     }
@@ -235,6 +316,8 @@ export function usePrediction() {
       isComplete: false,
       result: null,
       error: null,
+      validationError: false,
+      validation: null,
     });
   }, []);
 
@@ -258,6 +341,8 @@ export function usePrediction() {
     isComplete: predictionState.isComplete,
     result: predictionState.result,
     error: predictionState.error,
+    validationError: predictionState.validationError,
+    validation: predictionState.validation,
 
     // Actions
     predict,

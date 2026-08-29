@@ -1798,3 +1798,71 @@
     max-width: 95%;
   }
 }
+
+/* ============================================
+   VALIDATING STAGE
+============================================ */
+
+.validating-stage {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.validation-visualization {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.validation-shield {
+  color: #00e6ff;
+  filter: drop-shadow(0 0 20px rgba(0, 230, 255, 0.3));
+}
+
+.validation-status {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 300px;
+}
+
+.validation-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+}
+
+.validation-step svg {
+  color: #00ff88;
+  flex-shrink: 0;
+}
+
+.validation-spinner {
+  width: 16px;
+  height: 16px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.spinner-dot {
+  width: 6px;
+  height: 6px;
+  background: #00e6ff;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(0, 230, 255, 0.5);
+}

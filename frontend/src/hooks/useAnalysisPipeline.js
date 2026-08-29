@@ -13,6 +13,7 @@ export const STAGES = {
   LANDING: "landing",
   UPLOAD: "upload",
   PREVIEW: "preview",
+  VALIDATING: "validating", // NEW: Validation gate before pipeline
   SCANNING: "scanning",
   PREPROCESSING: "preprocessing",
   FEATURE_EXTRACTION: "feature_extraction",
@@ -72,7 +73,7 @@ export function useAnalysisPipeline() {
   const predictionStatusRef = useRef({ isComplete: false, error: null });
 
   // Use existing prediction hook for real API integration
-  const { isLoading, isComplete, result, error, predict } = usePrediction();
+  const { isLoading, isComplete, result, error, validationError, validation, predict } = usePrediction();
 
   // Update prediction status ref whenever prediction state changes
   useEffect(() => {
@@ -121,102 +122,91 @@ export function useAnalysisPipeline() {
 
   /**
    * Start analysis pipeline
+   * CRITICAL: Validation must complete BEFORE visual pipeline starts
    */
   const startAnalysis = useCallback(async () => {
     if (!imageFile) return;
 
-    // Start from scanning stage
-    goToStage(STAGES.SCANNING);
+    // STEP 1: Show validation state and call prediction API
+    console.log("[PIPELINE] Starting analysis - validating image...");
+    goToStage(STAGES.VALIDATING);
     
-    // Kick off real API prediction in background
-    predict(imageFile).catch((err) => {
-      console.error("Prediction failed:", err);
-    });
+    try {
+      // Call predict and wait for result
+      await predict(imageFile);
+      
+      // STEP 2: Validation passed and prediction complete - now start visual pipeline
+      console.log("[PIPELINE] Validation passed - starting visual pipeline");
+      goToStage(STAGES.SCANNING);
+      
+      // Progress through visual stages
+      const progressPipeline = async () => {
+        // Scanning
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.PREPROCESSING);
+            resolve();
+          }, STAGE_INFO[STAGES.SCANNING].duration);
+        });
 
-    // Progress through visual stages while API processes
-    const progressPipeline = async () => {
-      // Scanning
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.PREPROCESSING);
-          resolve();
-        }, STAGE_INFO[STAGES.SCANNING].duration);
-      });
+        // Preprocessing
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.FEATURE_EXTRACTION);
+            resolve();
+          }, STAGE_INFO[STAGES.PREPROCESSING].duration);
+        });
 
-      // Preprocessing
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.FEATURE_EXTRACTION);
-          resolve();
-        }, STAGE_INFO[STAGES.PREPROCESSING].duration);
-      });
+        // Feature extraction
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.DIMENSIONALITY_REDUCTION);
+            resolve();
+          }, STAGE_INFO[STAGES.FEATURE_EXTRACTION].duration);
+        });
 
-      // Feature extraction
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.DIMENSIONALITY_REDUCTION);
-          resolve();
-        }, STAGE_INFO[STAGES.FEATURE_EXTRACTION].duration);
-      });
+        // Dimensionality reduction
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.QUANTUM_PROCESSING);
+            resolve();
+          }, STAGE_INFO[STAGES.QUANTUM_PROCESSING].duration);
+        });
 
-      // Dimensionality reduction
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.QUANTUM_PROCESSING);
-          resolve();
-        }, STAGE_INFO[STAGES.DIMENSIONALITY_REDUCTION].duration);
-      });
+        // Quantum processing (already complete from predict call)
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.EVIDENCE_RETRIEVAL);
+            resolve();
+          }, STAGE_INFO[STAGES.QUANTUM_PROCESSING].duration);
+        });
 
-      // Quantum processing (wait for real API to complete here)
-      await new Promise(resolve => {
-        const minDuration = STAGE_INFO[STAGES.QUANTUM_PROCESSING].duration;
-        const startTime = Date.now();
-        
-        const checkCompletion = () => {
-          const elapsed = Date.now() - startTime;
-          const { isComplete: predComplete, error: predError } = predictionStatusRef.current;
-          
-          // Check if prediction is complete or failed
-          if (predComplete || predError) {
-            // Ensure minimum visual duration
-            const remaining = minDuration - elapsed;
-            if (remaining > 0) {
-              stageTimeoutRef.current = setTimeout(() => {
-                completeStage(STAGES.EVIDENCE_RETRIEVAL);
-                resolve();
-              }, remaining);
-            } else {
-              completeStage(STAGES.EVIDENCE_RETRIEVAL);
-              resolve();
-            }
-          } else {
-            // Check again in 200ms
-            stageTimeoutRef.current = setTimeout(checkCompletion, 200);
-          }
-        };
-        
-        // Start checking after a brief delay
-        stageTimeoutRef.current = setTimeout(checkCompletion, 500);
-      });
+        // Evidence retrieval
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.REASONING);
+            resolve();
+          }, STAGE_INFO[STAGES.EVIDENCE_RETRIEVAL].duration);
+        });
 
-      // Evidence retrieval
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.REASONING);
-          resolve();
-        }, STAGE_INFO[STAGES.EVIDENCE_RETRIEVAL].duration);
-      });
+        // Reasoning
+        await new Promise(resolve => {
+          stageTimeoutRef.current = setTimeout(() => {
+            completeStage(STAGES.RESULT);
+            resolve();
+          }, STAGE_INFO[STAGES.REASONING].duration);
+        });
+      };
 
-      // Reasoning
-      await new Promise(resolve => {
-        stageTimeoutRef.current = setTimeout(() => {
-          completeStage(STAGES.RESULT);
-          resolve();
-        }, STAGE_INFO[STAGES.REASONING].duration);
-      });
-    };
-
-    progressPipeline();
+      progressPipeline();
+      
+    } catch (error) {
+      // Prediction/validation failed - error is thrown from predict()
+      console.error("[PIPELINE] Prediction/validation failed:", error);
+      // Go directly to result stage to show error
+      // The validationError state is already set by usePrediction hook
+      goToStage(STAGES.RESULT);
+    }
   }, [imageFile, predict, goToStage, completeStage]);
 
   /**
@@ -268,6 +258,8 @@ export function useAnalysisPipeline() {
     isPredicting: isLoading,
     predictionComplete: isComplete,
     predictionError: error,
+    validationError: validationError,
+    validation: validation,
     
     // Actions
     startTriage,

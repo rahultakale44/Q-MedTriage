@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test CORS and API Connection</title>
+</head>
+<body>
+    <h1>Test API Connection from Browser</h1>
+    <button onclick="testHealth()">Test /health</button>
+    <button onclick="testPredict()">Test /predict with file</button>
+    <input type="file" id="fileInput" accept="image/*">
+    <pre id="output"></pre>
+
+    <script>
+        const API_URL = "http://localhost:8000";
+        
+        async function testHealth() {
+            const output = document.getElementById('output');
+            output.textContent = "Testing /health...\n";
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                output.textContent += `Status: ${response.status}\n`;
+                const data = await response.json();
+                output.textContent += `Response: ${JSON.stringify(data, null, 2)}\n`;
+            } catch (error) {
+                output.textContent += `ERROR: ${error.message}\n`;
+            }
+        }
+        
+        async function testPredict() {
+            const output = document.getElementById('output');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!fileInput.files[0]) {
+                output.textContent = "Please select a file first\n";
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            output.textContent = `Testing /predict...\n`;
+            output.textContent += `File: ${file.name} (${file.type}, ${file.size} bytes)\n\n`;
+            
+            try {
+                const formData = new FormData();
+                formData.append("file", file);
+                
+                output.textContent += `Sending POST to ${API_URL}/predict...\n`;
+                
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: "POST",
+                    body: formData,
+                });
+                
+                output.textContent += `Status: ${response.status}\n`;
+                output.textContent += `OK: ${response.ok}\n\n`;
+                
+                const data = await response.json();
+                output.textContent += `Response:\n${JSON.stringify(data, null, 2)}\n`;
+                
+            } catch (error) {
+                output.textContent += `FETCH ERROR: ${error.message}\n`;
+                output.textContent += `This usually means CORS or network issue\n`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -7,10 +7,12 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { usePrediction } from "./usePrediction";
+import { useBulkPrediction } from "./useBulkPrediction";
 
 // Pipeline stages in order
 export const STAGES = {
   LANDING: "landing",
+  MODE_SELECTION: "mode_selection", // NEW: Choose single or bulk
   UPLOAD: "upload",
   PREVIEW: "preview",
   VALIDATING: "validating", // NEW: Validation gate before pipeline
@@ -23,6 +25,10 @@ export const STAGES = {
   REASONING: "reasoning",
   RESULT: "result",
   CHAT: "chat",
+  // Bulk analysis stages
+  BULK_UPLOAD: "bulk_upload",
+  BULK_PROCESSING: "bulk_processing",
+  BULK_RESULTS: "bulk_results",
 };
 
 // Stage display metadata with SLOWER, more engaging durations
@@ -67,13 +73,25 @@ export const STAGE_INFO = {
 export function useAnalysisPipeline() {
   const [currentStage, setCurrentStage] = useState(STAGES.LANDING);
   const [completedStages, setCompletedStages] = useState(new Set());
+  const [analysisMode, setAnalysisMode] = useState(null); // 'single' | 'bulk'
   const [uploadedImage, setUploadedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
+  const [bulkFiles, setBulkFiles] = useState([]); // For bulk mode
+  const [bulkResults, setBulkResults] = useState(null); // Batch results
   const stageTimeoutRef = useRef(null);
   const predictionStatusRef = useRef({ isComplete: false, error: null });
 
   // Use existing prediction hook for real API integration
   const { isLoading, isComplete, result, error, validationError, validation, predict } = usePrediction();
+  
+  // Bulk prediction hook
+  const { 
+    isLoading: isBulkLoading, 
+    isComplete: isBulkComplete, 
+    results: bulkPredictionResults, 
+    error: bulkError,
+    predictBatch 
+  } = useBulkPrediction();
 
   // Update prediction status ref whenever prediction state changes
   useEffect(() => {
@@ -94,10 +112,22 @@ export function useAnalysisPipeline() {
   }, []);
 
   /**
-   * Start triage (go to upload)
+   * Start triage (go to mode selection)
    */
   const startTriage = useCallback(() => {
-    goToStage(STAGES.UPLOAD);
+    goToStage(STAGES.MODE_SELECTION);
+  }, [goToStage]);
+
+  /**
+   * Select analysis mode
+   */
+  const selectMode = useCallback((mode) => {
+    setAnalysisMode(mode);
+    if (mode === "single") {
+      goToStage(STAGES.UPLOAD);
+    } else if (mode === "bulk") {
+      goToStage(STAGES.BULK_UPLOAD);
+    }
   }, [goToStage]);
 
   /**
@@ -217,21 +247,67 @@ export function useAnalysisPipeline() {
       URL.revokeObjectURL(uploadedImage);
     }
     
+    // Clean up bulk files object URLs
+    bulkFiles.forEach(file => {
+      if (file && typeof file === 'object') {
+        const url = URL.createObjectURL(file);
+        URL.revokeObjectURL(url);
+      }
+    });
+    
     if (stageTimeoutRef.current) {
       clearTimeout(stageTimeoutRef.current);
     }
     
     setCurrentStage(STAGES.LANDING);
     setCompletedStages(new Set());
+    setAnalysisMode(null);
     setUploadedImage(null);
     setImageFile(null);
-  }, [uploadedImage]);
+    setBulkFiles([]);
+    setBulkResults(null);
+  }, [uploadedImage, bulkFiles]);
 
   /**
    * Open chat interface
    */
   const openChat = useCallback(() => {
     goToStage(STAGES.CHAT);
+  }, [goToStage]);
+
+  /**
+   * Process bulk images through API
+   */
+  const processBulkImages = useCallback(async (files) => {
+    console.log("[PIPELINE] Starting bulk analysis for", files.length, "images");
+    
+    try {
+      const results = await predictBatch(files);
+      setBulkResults(results);
+      goToStage(STAGES.BULK_RESULTS);
+    } catch (error) {
+      console.error("[PIPELINE] Bulk analysis failed:", error);
+      // Stay on processing stage with error state
+      // The error is already in bulkError from useBulkPrediction hook
+    }
+  }, [predictBatch, goToStage]);
+
+  /**
+   * Handle bulk images upload
+   */
+  const handleBulkUpload = useCallback((files) => {
+    setBulkFiles(files);
+    goToStage(STAGES.BULK_PROCESSING);
+    
+    // Start batch prediction
+    processBulkImages(files);
+  }, [goToStage, processBulkImages]);
+
+  /**
+   * Back to mode selection
+   */
+  const backToModeSelection = useCallback(() => {
+    goToStage(STAGES.MODE_SELECTION);
   }, [goToStage]);
 
   // Cleanup on unmount
@@ -250,8 +326,15 @@ export function useAnalysisPipeline() {
     // Current state
     currentStage,
     completedStages,
+    analysisMode,
     uploadedImage,
     imageFile,
+    
+    // Bulk state
+    bulkFiles,
+    bulkResults,
+    isBulkProcessing: isBulkLoading,
+    bulkError,
     
     // Prediction data
     predictionResult: result,
@@ -263,8 +346,11 @@ export function useAnalysisPipeline() {
     
     // Actions
     startTriage,
+    selectMode,
     handleImageUpload,
     startAnalysis,
+    handleBulkUpload,
+    backToModeSelection,
     resetPipeline,
     openChat,
     goToStage,

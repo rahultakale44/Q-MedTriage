@@ -115,11 +115,15 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .upload-container {
   max-width: 700px;
   width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .upload-header {

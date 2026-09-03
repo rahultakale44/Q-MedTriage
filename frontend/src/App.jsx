@@ -26,29 +26,55 @@ import {
   EvidenceRetrievalStage,
   ReasoningStage,
   ResultStage,
+  AnalysisModeSelection,
+  BulkUploadStage,
+  BulkProcessingStage,
+  BulkResultsStage,
 } from "./components";
 import "./App.css";
 import "./stages.css";
+import "./bulk-analysis.css";
+import "./landing-info.css";
+import {
+  AboutSection,
+  WorkflowSection,
+  PipelineArchitectureSection,
+  QuantumExplanationSection,
+  ComparisonSection,
+  IntelligenceSection,
+  CTASection,
+} from "./components/LandingInfo";
 
 function App() {
   const {
     currentStage,
     completedStages,
     uploadedImage,
+    bulkFiles,
+    bulkResults,
+    isBulkProcessing,
+    bulkError,
     predictionResult,
     predictionError,
     validationError,
     startTriage,
+    selectMode,
     handleImageUpload,
     startAnalysis,
+    handleBulkUpload,
+    backToModeSelection,
     resetPipeline,
     openChat,
   } = useAnalysisPipeline();
 
   const showProgress = currentStage !== STAGES.LANDING && 
+                       currentStage !== STAGES.MODE_SELECTION &&
                        currentStage !== STAGES.UPLOAD && 
                        currentStage !== STAGES.PREVIEW &&
                        currentStage !== STAGES.VALIDATING &&
+                       currentStage !== STAGES.BULK_UPLOAD &&
+                       currentStage !== STAGES.BULK_PROCESSING &&
+                       currentStage !== STAGES.BULK_RESULTS &&
                        currentStage !== STAGES.CHAT;
 
   return (
@@ -67,15 +93,36 @@ function App() {
       <AnimatePresence mode="wait">
         {/* LANDING / HERO */}
         {currentStage === STAGES.LANDING && (
-          <HeroSection
-            key="hero"
-            onStartTriage={startTriage}
+          <>
+            <HeroSection
+              key="hero"
+              onStartTriage={startTriage}
+            />
+            <AboutSection key="about" />
+            <WorkflowSection key="workflow" />
+            <PipelineArchitectureSection key="architecture" />
+            <QuantumExplanationSection key="quantum" />
+            <ComparisonSection key="comparison" />
+            <IntelligenceSection key="intelligence" />
+            <CTASection key="cta" onStartTriage={startTriage} />
+          </>
+        )}
+
+        {/* MODE SELECTION */}
+        {currentStage === STAGES.MODE_SELECTION && (
+          <AnalysisModeSelection
+            key="mode-selection"
+            onSelectMode={selectMode}
           />
         )}
 
-        {/* UPLOAD */}
+        {/* UPLOAD (Single Mode) */}
         {currentStage === STAGES.UPLOAD && (
-          <UploadStage key="upload" onImageUpload={handleImageUpload} />
+          <UploadStage 
+            key="upload" 
+            onImageUpload={handleImageUpload} 
+            onBack={backToModeSelection}
+          />
         )}
 
         {/* PREVIEW */}
@@ -91,6 +138,34 @@ function App() {
         {/* VALIDATING */}
         {currentStage === STAGES.VALIDATING && (
           <ValidatingStage key="validating" />
+        )}
+
+        {/* BULK UPLOAD */}
+        {currentStage === STAGES.BULK_UPLOAD && (
+          <BulkUploadStage
+            key="bulk-upload"
+            onImagesUpload={handleBulkUpload}
+            onBack={backToModeSelection}
+          />
+        )}
+
+        {/* BULK PROCESSING */}
+        {currentStage === STAGES.BULK_PROCESSING && (
+          <BulkProcessingStage
+            key="bulk-processing"
+            totalImages={bulkFiles.length}
+            completedImages={isBulkProcessing ? 0 : bulkFiles.length}
+          />
+        )}
+
+        {/* BULK RESULTS */}
+        {currentStage === STAGES.BULK_RESULTS && bulkResults && (
+          <BulkResultsStage
+            key="bulk-results"
+            batchResults={bulkResults}
+            uploadedFiles={bulkFiles}
+            onReset={resetPipeline}
+          />
         )}
 
         {/* SCANNING */}

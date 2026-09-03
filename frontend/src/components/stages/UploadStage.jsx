@@ -3,11 +3,11 @@
  */
 
 import { useState, useRef } from "react";
-import { Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
+import { Upload, Image as ImageIcon, AlertCircle, Microscope } from "lucide-react";
 import { motion } from "framer-motion";
 import { validateImageFile } from "../../services/api";
 
-export function UploadStage({ onImageUpload }) {
+export function UploadStage({ onImageUpload, onBack }) {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
@@ -65,7 +65,33 @@ export function UploadStage({ onImageUpload }) {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5 }}
     >
+      {/* Animated Background */}
+      <div className="mode-bg-animation">
+        <div className="mode-particle"></div>
+        <div className="mode-particle"></div>
+        <div className="mode-particle"></div>
+        <div className="mode-particle"></div>
+        <div className="mode-particle"></div>
+        <div className="mode-grid"></div>
+      </div>
+
       <div className="upload-container">
+        {/* Q-MedTriage Branding */}
+        <motion.div 
+          className="mode-branding"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="brand-icon">
+            <Microscope size={24} />
+          </div>
+          <div className="brand-text">
+            <h2 className="brand-name">Q-MEDTRIAGE</h2>
+            <span className="brand-tagline">QUANTUM MEDICAL INTELLIGENCE</span>
+          </div>
+        </motion.div>
+
         <div className="upload-header">
           <h1>Begin Your Analysis</h1>
           <p>Upload a medical image for AI-assisted triage and evidence-grounded analysis</p>
@@ -125,6 +151,12 @@ export function UploadStage({ onImageUpload }) {
             <span className="info-value">Images processed securely</span>
           </div>
         </div>
+
+        {onBack && (
+          <button className="back-button" onClick={onBack}>
+            ← Back to Mode Selection
+          </button>
+        )}
       </div>
     </motion.div>
   );

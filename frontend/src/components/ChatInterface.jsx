@@ -14,7 +14,7 @@ const QUICK_QUESTIONS = [
   "What does confidence mean?",
 ];
 
-export function ChatInterface({ predictionData, image, onClose }) {
+export function ChatInterface({ predictionData, image, onClose, resultContext = null }) {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -88,8 +88,8 @@ export function ChatInterface({ predictionData, image, onClose }) {
     }
   };
 
-  const prediction = predictionData?.triage?.prediction || "UNKNOWN";
-  const confidence = predictionData?.triage?.confidence || 0;
+  const prediction = resultContext?.prediction || predictionData?.triage?.prediction || "UNKNOWN";
+  const confidence = resultContext?.confidence || predictionData?.triage?.confidence || 0;
 
   return (
     <motion.div
@@ -113,7 +113,9 @@ export function ChatInterface({ predictionData, image, onClose }) {
         </div>
 
         <div className="chat-result-summary">
-          <div className="summary-label">CURRENT RESULT</div>
+          <div className="summary-label">
+            {resultContext ? `ANALYZING: ${resultContext.filename}` : "CURRENT RESULT"}
+          </div>
           <div className="summary-prediction">
             {prediction} · {(confidence * 100).toFixed(1)}%
           </div>

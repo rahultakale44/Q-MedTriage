@@ -269,6 +269,162 @@ async def validate_image(file: UploadFile = File(...)):
         )
 
 
+@app.post("/predict/batch")
+async def predict_batch(files: list[UploadFile] = File(...), classifier: str = "classical"):
+    """
+    Batch predict pneumonia from multiple chest X-ray images
+    
+    Process up to 50 chest X-rays simultaneously with independent validation
+    and prediction for each image. Invalid images are rejected individually
+    without failing the entire batch.
+    
+    Args:
+        files: List of uploaded chest X-ray images (max 50)
+        classifier: "classical" (default) or "quantum"
+    
+    Returns:
+        JSON with batch summary and individual results for each image
+    """
+    print("\n" + "=" * 70)
+    print("[BATCH PREDICT] Request received")
+    print("=" * 70)
+    print(f"[BATCH PREDICT] Total images: {len(files)}")
+    print("=" * 70)
+    
+    # Validate batch size
+    if len(files) > 50:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Too many images. Maximum 50 images allowed, received {len(files)}"
+        )
+    
+    if len(files) == 0:
+        raise HTTPException(
+            status_code=400,
+            detail="No images provided"
+        )
+    
+    # Validate classifier parameter
+    if classifier not in ["classical", "quantum"]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid classifier: {classifier}. Must be 'classical' or 'quantum'"
+        )
+    
+    # Check if pipeline is available
+    if not PIPELINE_LOADED:
+        raise HTTPException(
+            status_code=503,
+            detail="Inference pipeline not available"
+        )
+    
+    results = []
+    successful_count = 0
+    rejected_count = 0
+    failed_count = 0
+    
+    # Process each image independently
+    for idx, file in enumerate(files):
+        image_id = f"image_{idx + 1:03d}"
+        print(f"\n[BATCH] Processing {idx + 1}/{len(files)}: {file.filename}")
+        
+        try:
+            # Validate file type
+            if not file.content_type.startswith("image/"):
+                results.append({
+                    "image_id": image_id,
+                    "filename": file.filename,
+                    "success": False,
+                    "status": "failed",
+                    "error": f"Invalid file type: {file.content_type}"
+                })
+                failed_count += 1
+                continue
+            
+            # Read image
+            contents = await file.read()
+            image = Image.open(io.BytesIO(contents))
+            
+            # Validation gate
+            if VALIDATOR_LOADED:
+                validation_result = chest_xray_validator.validate(image)
+                
+                if not validation_result["is_valid_chest_xray"]:
+                    # Reject this image, continue with others
+                    print(f"[BATCH] ✗ REJECTED - {validation_result['detected_type']}")
+                    results.append({
+                        "image_id": image_id,
+                        "filename": file.filename,
+                        "success": False,
+                        "status": "rejected",
+                        "reason": validation_result["reason"],
+                        "detected_type": validation_result["detected_type"],
+                        "validation_confidence": validation_result["confidence"]
+                    })
+                    rejected_count += 1
+                    continue
+                
+                print(f"[BATCH] ✓ ACCEPTED - Chest X-ray confidence = {validation_result['confidence']:.2%}")
+            
+            # Run inference
+            prediction_result = inference_pipeline.predict(image, classifier=classifier, include_features=False)
+            
+            if not prediction_result["success"]:
+                results.append({
+                    "image_id": image_id,
+                    "filename": file.filename,
+                    "success": False,
+                    "status": "failed",
+                    "error": prediction_result.get("error", "Prediction failed")
+                })
+                failed_count += 1
+                continue
+            
+            # Success
+            results.append({
+                "image_id": image_id,
+                "filename": file.filename,
+                "success": True,
+                "status": "completed",
+                "prediction": prediction_result["prediction_label"],
+                "confidence": prediction_result["confidence"],
+                "probabilities": prediction_result["probabilities"],
+                "model": prediction_result["model"],
+                "model_type": prediction_result["model_type"],
+                "inference_time_ms": prediction_result["inference_time_ms"]
+            })
+            successful_count += 1
+            print(f"[BATCH] ✓ COMPLETED - {prediction_result['prediction_label']} ({prediction_result['confidence']:.1%})")
+            
+        except Exception as e:
+            print(f"[BATCH] ✗ ERROR processing {file.filename}: {str(e)}")
+            results.append({
+                "image_id": image_id,
+                "filename": file.filename,
+                "success": False,
+                "status": "failed",
+                "error": f"Processing error: {str(e)}"
+            })
+            failed_count += 1
+    
+    print("\n" + "=" * 70)
+    print(f"[BATCH] Complete: {successful_count} successful, {rejected_count} rejected, {failed_count} failed")
+    print("=" * 70)
+    
+    return JSONResponse(content={
+        "success": True,
+        "batch_summary": {
+            "total_images": len(files),
+            "processed": len(files),
+            "successful": successful_count,
+            "rejected": rejected_count,
+            "failed": failed_count
+        },
+        "classifier": classifier,
+        "results": results
+    })
+
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...), classifier: str = "classical"):
     """

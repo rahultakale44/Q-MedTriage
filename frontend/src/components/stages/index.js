@@ -13,3 +13,9 @@ export { QuantumProcessingStage } from "./QuantumProcessingStage";
 export { EvidenceRetrievalStage } from "./EvidenceRetrievalStage";
 export { ReasoningStage } from "./ReasoningStage";
 export { ResultStage } from "./ResultStage";
+
+// Bulk analysis components
+export { AnalysisModeSelection } from "./AnalysisModeSelection";
+export { BulkUploadStage } from "./BulkUploadStage";
+export { BulkProcessingStage } from "./BulkProcessingStage";
+export { BulkResultsStage } from "./BulkResultsStage";

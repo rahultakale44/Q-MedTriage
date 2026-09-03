@@ -61,22 +61,23 @@ button:focus-visible {
 }
 
 /* =========================================================
-   HERO HEADER (COMPACT)
+   HERO HEADER (FIXED ACROSS ALL PAGES)
 ========================================================= */
 
 .hero-header {
-  position: absolute;
+  position: fixed; /* CHANGED: Now fixed on all pages */
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  z-index: 100; /* INCREASED: Above all content */
   
-  padding: 1.5rem 6vw;
+  padding: 1rem 6vw; /* REDUCED: More compact */
   
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(5, 6, 11, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(5, 6, 11, 0.95); /* INCREASED: More opaque */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* NEW: Shadow for depth */
 }
 
 .hero-header-content {
@@ -95,8 +96,8 @@ button:focus-visible {
 }
 
 .hero-header .brand-mark {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   
   display: grid;
   place-items: center;
@@ -108,23 +109,26 @@ button:focus-visible {
   background: rgba(0, 230, 255, 0.05);
   
   box-shadow: 0 0 20px rgba(0, 230, 255, 0.1);
+  flex-shrink: 0; /* NEW: Prevent shrinking */
 }
 
 .hero-header .brand-name {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   color: #ffffff;
+  white-space: nowrap; /* NEW: Prevent wrapping */
 }
 
 .hero-header .brand-sub {
-  margin-top: 2px;
+  margin-top: 1px;
   
   color: rgba(0, 230, 255, 0.5);
   
   font-family: "DM Mono", monospace;
-  font-size: 0.625rem;
+  font-size: 0.55rem;
   letter-spacing: 0.12em;
+  white-space: nowrap; /* NEW: Prevent wrapping */
 }
 
 .system-status {
@@ -132,16 +136,17 @@ button:focus-visible {
   align-items: center;
   gap: 0.5rem;
   
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.85rem;
   
   background: rgba(0, 255, 136, 0.05);
   border: 1px solid rgba(0, 255, 136, 0.15);
   border-radius: 20px;
   
   font-family: "DM Mono", monospace;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   letter-spacing: 0.08em;
   color: rgba(0, 255, 136, 0.8);
+  white-space: nowrap; /* NEW: Prevent wrapping */
 }
 
 .status-dot {

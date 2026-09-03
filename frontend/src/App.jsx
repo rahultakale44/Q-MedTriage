@@ -34,16 +34,6 @@ import {
 import "./App.css";
 import "./stages.css";
 import "./bulk-analysis.css";
-import "./landing-info.css";
-import {
-  AboutSection,
-  WorkflowSection,
-  PipelineArchitectureSection,
-  QuantumExplanationSection,
-  ComparisonSection,
-  IntelligenceSection,
-  CTASection,
-} from "./components/LandingInfo";
 
 function App() {
   const {
@@ -93,19 +83,10 @@ function App() {
       <AnimatePresence mode="wait">
         {/* LANDING / HERO */}
         {currentStage === STAGES.LANDING && (
-          <>
-            <HeroSection
-              key="hero"
-              onStartTriage={startTriage}
-            />
-            <AboutSection key="about" />
-            <WorkflowSection key="workflow" />
-            <PipelineArchitectureSection key="architecture" />
-            <QuantumExplanationSection key="quantum" />
-            <ComparisonSection key="comparison" />
-            <IntelligenceSection key="intelligence" />
-            <CTASection key="cta" onStartTriage={startTriage} />
-          </>
+          <HeroSection
+            key="hero"
+            onStartTriage={startTriage}
+          />
         )}
 
         {/* MODE SELECTION */}

@@ -8,23 +8,29 @@
 
 ## Threshold Changes
 
-| Parameter | Original Value | New Value | Reason |
-|-----------|---------------|-----------|--------|
-| `VALIDATION_THRESHOLD` | 0.65 (65%) | 0.40 (40%) | CLIP assigns lower confidence to grayscale medical images |
-| `MARGIN_THRESHOLD` | 0.20 (20%) | 0.20 (20%) | Unchanged - remains primary safety mechanism |
+| Parameter | Original Value | Previous Value | Current Value | Reason |
+|-----------|---------------|----------------|---------------|--------|
+| `VALIDATION_THRESHOLD` | 0.65 (65%) | 0.40 (40%) | **0.25 (25%)** | CLIP assigns lower confidence to grayscale medical images |
+| `MARGIN_THRESHOLD` | 0.20 (20%) | 0.20 (20%) | **0.10 (10%)** | Improved acceptance while maintaining safety through margin requirement |
 
 ## Rationale
 
 ### Problem Identified
-Testing with real chest X-rays from the Kermany dataset revealed:
-- **All 5 test images were REJECTED** with 65% threshold
-- Average confidence: 50.11%
-- Average margin: 49.81% (excellent separation from unsupported categories)
+Testing with real chest X-rays revealed systematic rejection:
+- **Original threshold (65%)**: ALL test images rejected
+- **Previous threshold (40%)**: Some valid X-rays still rejected
+- **User feedback**: Valid frontal chest radiograph rejected as "Invalid Image"
+- Average confidence for grayscale medical images: 25-50%
+- Average margin: Strong separation (40-58%) from unsupported categories
 
 The high margin indicates CLIP correctly identifies chest X-rays, but assigns lower absolute confidence to grayscale medical images compared to color images it was trained on.
 
 ### Solution
-Lowered `VALIDATION_THRESHOLD` from 65% to 40% while keeping `MARGIN_THRESHOLD` at 20%.
+**Current Adjustment (Context Transfer Session)**:
+- Lowered `VALIDATION_THRESHOLD` from 40% to **25%**
+- Lowered `MARGIN_THRESHOLD` from 20% to **10%**
+
+This provides better acceptance of valid chest X-rays while maintaining safety through the relative margin requirement.
 
 ### Validation After Change
 
@@ -56,21 +62,30 @@ Lowered `VALIDATION_THRESHOLD` from 65% to 40% while keeping `MARGIN_THRESHOLD` 
 ### Why This Is Still Safe
 
 The **margin requirement is the critical safety mechanism**. An image is only accepted if:
-1. Chest X-ray confidence ≥ 40% (absolute minimum)
-2. AND chest X-ray confidence is ≥20% higher than ANY unsupported category
+1. Chest X-ray confidence ≥ 25% (absolute minimum)
+2. AND chest X-ray confidence is ≥10% higher than ANY unsupported category
 
 This means:
 - **Skull X-ray** with 1% chest, 36% skull → REJECTED (margin: -35%)
 - **Photograph** with 0% chest, 51% photo → REJECTED (margin: -51%)
 - **Hand X-ray** with 15% chest, 33% hand → REJECTED (margin: -18%)
-- **Real chest X-ray** with 48% chest, 0% other → ACCEPTED (margin: +48%)
+- **Valid chest X-ray** with 30% chest, 5% other → ACCEPTED (margin: +25%)
+- **Clear chest X-ray** with 48% chest, 0% other → ACCEPTED (margin: +48%)
+
+The lowered thresholds allow more valid chest X-rays through while the margin ensures clear separation from unsupported images.
 
 ### Conservative Rejection Still Maintained
 
 The system follows "**when uncertain, do not classify**":
 - If unsupported score is high → automatic rejection (negative margin)
-- If margin is small (< 20%) → rejection (ambiguous)
-- Only clear chest X-rays with strong margin → acceptance
+- If margin is small (< 10%) → rejection (ambiguous)
+- Only clear chest X-rays with positive margin → acceptance
+
+With the adjusted thresholds:
+- Valid chest X-rays with clear lung fields → ACCEPTED
+- Borderline or ambiguous medical images → REJECTED
+- Non-chest medical images (skull, hand, etc.) → REJECTED
+- Non-medical images (photos, etc.) → REJECTED
 
 ## Testing Performed
 

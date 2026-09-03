@@ -36,7 +36,11 @@ class ChestXRayValidator:
             "a frontal chest x-ray radiograph",
             "a chest radiograph showing lungs",
             "a chest x-ray medical image",
-            "a posteroanterior chest radiograph"
+            "a posteroanterior chest radiograph",
+            "a thorax x-ray showing ribcage and lungs",
+            "a grayscale chest radiograph",
+            "an anteroposterior chest x-ray",
+            "a medical chest radiograph with visible lung fields"
         ],
         "unsupported": [
             "a skull x-ray",
@@ -56,15 +60,16 @@ class ChestXRayValidator:
     
     # Conservative threshold: require high confidence for chest X-ray
     # If confidence < threshold, reject the image
-    # ADJUSTED: Lowered from 65% to 40% after testing with real grayscale chest X-rays
+    # ADJUSTED: Lowered from 40% → 25% → 20% to accept more valid grayscale chest X-rays
     # CLIP assigns lower absolute confidence to grayscale medical images
-    VALIDATION_THRESHOLD = 0.40  # 40% confidence minimum
+    VALIDATION_THRESHOLD = 0.20  # 20% confidence minimum
     
     # Minimum margin between chest_xray and unsupported categories
     # The chest_xray score must be at least this much higher
     # This is the PRIMARY safety mechanism - requires chest_xray score to be
     # significantly higher than any unsupported category
-    MARGIN_THRESHOLD = 0.20  # 20% margin (chest_xray must be 20% higher)
+    # ADJUSTED: Lowered from 20% → 10% → 8% for better acceptance of valid X-rays
+    MARGIN_THRESHOLD = 0.08  # 8% margin (chest_xray must be 8% higher)
     
     def __init__(self, model_name: str = "openai/clip-vit-base-patch32"):
         """

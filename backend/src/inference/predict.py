@@ -244,12 +244,18 @@ class ChestXRayInference:
         # Reshape to (1, 4) for sklearn
         features_2d = pca_features.reshape(1, -1)
         
-        # Predict
-        prediction = self.svm_model.predict(features_2d)[0]
+        # Get probabilities
         probabilities = self.svm_model.predict_proba(features_2d)[0]
         
+        # IMPORTANT: When using class_weight='balanced', svm.predict() uses
+        # a weighted decision boundary that can differ from argmax(probabilities).
+        # For medical triage, we want to predict based on highest probability,
+        # not the weighted boundary. This ensures the displayed prediction
+        # matches the probability bars shown to users.
+        prediction = int(np.argmax(probabilities))
+        
         return {
-            "prediction": int(prediction),
+            "prediction": prediction,
             "prediction_label": self.class_names[prediction],
             "probabilities": {
                 "NORMAL": float(probabilities[0]),

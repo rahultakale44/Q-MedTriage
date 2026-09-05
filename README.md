@@ -67,40 +67,82 @@ Chest X-Ray Upload
 
 ### Prerequisites
 
-- **Python 3.14+** (with `venv` support)
+- **Python 3.10+** (with `venv` or `pip` support)
 - **Node.js 18+** and npm 9+
 - **8GB+ RAM** (for ML models)
 - **Internet connection** (first run downloads models)
+- **VS Code** (recommended IDE)
 
-### Backend Setup
+### 🚀 VS Code Setup (Recommended)
 
+#### Step 1: Open Project in VS Code
 ```bash
-# Clone repository
-git clone <repository-url>
-cd Q-MedTriage/backend
+# Open the project folder
+code Q-MedTriage
+```
 
-# Create and activate virtual environment
+#### Step 2: Backend Setup
+
+**Windows:**
+```powershell
+# Open integrated terminal in VS Code (Ctrl + `)
+cd backend
+
+# Create virtual environment
 python -m venv .venv
-.\.venv\Scripts\activate  # Windows
-# source .venv/bin/activate  # Linux/Mac
+
+# Activate virtual environment
+.\.venv\Scripts\Activate.ps1
 
 # Install dependencies
 pip install -r requirements.txt
-
-# Configure environment
-cp ../.env.example ../.env
-# Edit .env with your API keys (see Configuration section)
-
-# Start backend server
-.\.venv\Scripts\python.exe -m uvicorn src.api.main:app --host 0.0.0.0 --port 8000
 ```
 
-Backend will be available at: **http://localhost:8000**
-
-### Frontend Setup
-
+**Linux/Mac:**
 ```bash
-# Navigate to frontend directory
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### Step 3: Configure Environment Variables
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Open .env in VS Code and add your API key:
+# 1. Get free API key from https://console.groq.com (or use Gemini)
+# 2. Replace 'your_api_key_here' with actual key
+# 3. Save the file
+```
+
+**Required in `.env`:**
+- `XAI_API_KEY` or `GEMINI_API_KEY` - Get from Groq or Google AI Studio
+
+#### Step 4: Build Knowledge Base (First Time Only)
+```bash
+# From backend directory with activated venv
+python scripts/build_knowledge_index.py
+
+# Move index files to correct location (Windows)
+Move-Item -Path ../data/knowledge/index/* -Destination data/knowledge/index/
+
+# Linux/Mac
+mv ../data/knowledge/index/* data/knowledge/index/
+```
+
+#### Step 5: Start Backend Server
+```bash
+# From backend directory with activated venv
+python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+✅ Backend will be available at: **http://localhost:8000**
+
+#### Step 6: Frontend Setup (New Terminal)
+```bash
+# Open new terminal in VS Code (Ctrl + Shift + `)
 cd frontend
 
 # Install dependencies
@@ -110,21 +152,60 @@ npm install
 npm run dev
 ```
 
-Frontend will be available at: **http://localhost:5174**
+✅ Frontend will be available at: **http://localhost:5174**
+
+#### Step 7: Access Application
+Open your browser and navigate to **http://localhost:5174**
+
+---
+
+### ⚡ Quick Commands (After Initial Setup)
+
+**Terminal 1 - Backend:**
+```bash
+cd backend
+.\.venv\Scripts\Activate.ps1  # Windows
+# source .venv/bin/activate    # Linux/Mac
+python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Terminal 2 - Frontend:**
+```bash
+cd frontend
+npm run dev
+```
 
 ---
 
 ##  Configuration
 
-Create a `.env` file in the project root (use `.env.example` as template):
+### Environment Variables Setup
 
+1. **Copy the example file:**
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env` and add your API key:**
+
+**Option 1: Groq (Recommended - Fast & Free)**
 ```bash
-# LLM API (Groq or OpenAI-compatible)
-XAI_API_KEY=gsk_your_api_key_here
+XAI_API_KEY=gsk_your_api_key_here_from_groq
 XAI_MODEL=openai/gpt-oss-120b
 XAI_MAX_TOKENS=1000
 XAI_TEMPERATURE=0.3
+```
 
+**Option 2: Google Gemini**
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.0-flash-exp
+GEMINI_MAX_TOKENS=500
+GEMINI_TEMPERATURE=0.3
+```
+
+**Other Settings (usually don't need to change):**
+```bash
 # RAG Configuration
 EMBEDDING_MODEL=all-MiniLM-L6-v2
 RAG_TOP_K=5
@@ -136,10 +217,20 @@ INTELLIGENCE_ENABLED=true
 FALLBACK_TO_PREDICTION_ONLY=true
 ```
 
-### Getting API Keys
+### 🔑 Getting API Keys (Free)
 
-- **Groq API**: Sign up at [console.groq.com](https://console.groq.com) (free tier available)
-- Alternative: Use OpenAI-compatible endpoints
+**Groq (Recommended):**
+1. Visit [console.groq.com](https://console.groq.com)
+2. Sign up for free account
+3. Go to API Keys section
+4. Create new key
+5. Copy key to `.env` as `XAI_API_KEY`
+
+**Google Gemini (Alternative):**
+1. Visit [aistudio.google.com](https://aistudio.google.com)
+2. Sign in with Google account
+3. Click "Get API Key"
+4. Copy key to `.env` as `GEMINI_API_KEY`
 
 ---
 
